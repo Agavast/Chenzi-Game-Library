@@ -590,6 +590,54 @@ button{
 
 
 /* =========================================================
+   MOBILE OPEN / FLAG SWITCH
+========================================================= */
+
+.mobile-action-switch{
+    display:none;
+}
+
+@media(max-width:800px){
+
+    .mobile-action-switch{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:6px;
+
+        margin-top:8px;
+        padding:5px;
+
+        background:#0d111a;
+        border:1px solid #252d3d;
+        border-radius:10px;
+    }
+
+    .mobile-action-btn{
+        height:40px;
+
+        border:1px solid #30394a;
+        border-radius:7px;
+
+        background:#151b27;
+        color:#7f8ba0;
+
+        font-size:11px;
+        font-weight:800;
+        letter-spacing:.8px;
+
+        transition:.15s;
+    }
+
+    .mobile-action-btn.active{
+        background:#315cff;
+        border-color:#315cff;
+        color:#fff;
+    }
+
+}
+
+
+/* =========================================================
    MOBILE
 ========================================================= */
 
@@ -1044,6 +1092,29 @@ button{
 
             </div>
 
+
+            <!-- =================================================
+                 MOBILE OPEN / FLAG SWITCH
+                 ================================================= -->
+
+            <div
+                class="mobile-action-switch"
+                id="mobileActionSwitch">
+
+                <button
+                    class="mobile-action-btn active"
+                    id="openModeBtn">
+                    OPEN
+                </button>
+
+                <button
+                    class="mobile-action-btn"
+                    id="flagModeBtn">
+                    FLAG
+                </button>
+
+            </div>
+
         </main>
 
 
@@ -1279,6 +1350,22 @@ const gameMessage =
 
 
 /* ============================================================
+   MOBILE OPEN / FLAG BUTTONS
+============================================================ */
+
+const openModeBtn =
+    document.getElementById("openModeBtn");
+
+const flagModeBtn =
+    document.getElementById("flagModeBtn");
+
+const mobileActionSwitch =
+    document.getElementById(
+        "mobileActionSwitch"
+    );
+
+
+/* ============================================================
    DEVICE
 ============================================================ */
 
@@ -1350,6 +1437,67 @@ let mobileLongPressTimer = null;
 let mobileLongPressTriggered = false;
 
 let mobileTouchCell = null;
+
+
+/* ============================================================
+   MOBILE ACTION MODE
+============================================================ */
+
+let mobileActionMode = "open";
+
+
+function setMobileActionMode(mode){
+
+    mobileActionMode = mode;
+
+
+    if(mode === "open"){
+
+        openModeBtn.classList.add(
+            "active"
+        );
+
+        flagModeBtn.classList.remove(
+            "active"
+        );
+
+    }else{
+
+        openModeBtn.classList.remove(
+            "active"
+        );
+
+        flagModeBtn.classList.add(
+            "active"
+        );
+
+    }
+
+}
+
+
+openModeBtn.addEventListener(
+    "click",
+    ()=>{
+
+        setMobileActionMode(
+            "open"
+        );
+
+    }
+);
+
+
+flagModeBtn.addEventListener(
+    "click",
+    ()=>{
+
+        setMobileActionMode(
+            "flag"
+        );
+
+    }
+);
 
 
 /* ============================================================
@@ -1631,24 +1779,34 @@ function createBoard(){
              */
 
             cell.addEventListener(
-                "click",
-                ()=>{
-                    if(
-                        isMobileDevice() &&
-                        mobileLongPressTriggered
-                    ){
+    "click",
+    ()=>{
 
-                        mobileLongPressTriggered =
-                            false;
+        /*
+         * 手机端点击已经由 pointerup 处理，
+         * 这里必须完全禁止再次执行。
+         *
+         * 否则 FLAG 模式下：
+         * pointerup -> 插旗
+         * click    -> 又执行 leftClick()
+         * 从而导致插旗后出现错误行为。
+         */
 
-                        return;
+        if(isMobileDevice()){
 
-                    }
+            return;
 
-                    leftClick(r,c);
+        }
 
-                }
-            );
+
+        /*
+         * 电脑端保持原来的左键翻开
+         */
+
+        leftClick(r,c);
+
+    }
+);
 
 
             cell.addEventListener(
@@ -1795,6 +1953,56 @@ function createBoard(){
                         clearTimeout(
                             mobileLongPressTimer
                         );
+
+
+                        /*
+                         * =====================================
+                         * 普通点击：
+                         * OPEN 模式 = 翻开
+                         * FLAG 模式 = 插旗
+                         *
+                         * 长按已经执行插旗时，
+                         * 不再执行第二次操作。
+                         * =====================================
+                         */
+
+                        if(
+                            !mobileLongPressTriggered &&
+                            mobileTouchCell === cell &&
+                            state === "playing"
+                        ){
+
+                            const rr =
+                                Number(
+                                    cell.dataset.row
+                                );
+
+                            const cc =
+                                Number(
+                                    cell.dataset.col
+                                );
+
+
+                            if(
+                                mobileActionMode ===
+                                "flag"
+                            ){
+
+                                rightClick(
+                                    rr,
+                                    cc
+                                );
+
+                            }else{
+
+                                leftClick(
+                                    rr,
+                                    cc
+                                );
+
+                            }
+
+                        }
 
 
                         mobileTouchCell =
@@ -2858,6 +3066,15 @@ if(isMobileDevice()){
     );
 
 }
+
+
+/*
+ * ============================================================
+ * 初始化移动端操作模式
+ * ============================================================
+ */
+
+setMobileActionMode("open");
 
 </script>
 
