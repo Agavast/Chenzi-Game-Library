@@ -1,0 +1,3479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Flappy Bird · Chenzi Game Library</title>
+
+
+<style>
+
+/* =========================================================
+                         基础
+========================================================= */
+
+:root{
+
+    --bg:#070b14;
+
+    --panel:#0e1420;
+
+    --panel2:#151c2a;
+
+    --line:#263247;
+
+    --text:#e8edf5;
+
+    --muted:#7f8ba0;
+
+    --accent:#66d9a8;
+
+}
+
+
+*{
+    box-sizing:border-box;
+}
+
+
+html,
+body{
+
+    margin:0;
+
+    width:100%;
+
+    min-height:100%;
+
+}
+
+
+body{
+
+    min-height:100vh;
+
+   background:
+    radial-gradient(
+        circle at 50% -15%,
+        #18345f 0%,
+        #0a1932 28%,
+        #050d1c 65%,
+        #020611 100%
+    );
+
+
+    color:var(--text);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        "Microsoft YaHei",
+        sans-serif;
+
+    display:flex;
+
+    justify-content:center;
+
+    overflow-x:hidden;
+
+}
+
+
+/* =========================================================
+                         星空
+========================================================= */
+
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    pointer-events:none;
+
+    background-image:
+
+        radial-gradient(
+            1px 1px at 10% 20%,
+            rgba(255,255,255,.65),
+            transparent
+        ),
+
+        radial-gradient(
+            1px 1px at 27% 72%,
+            rgba(255,255,255,.45),
+            transparent
+        ),
+
+        radial-gradient(
+            1px 1px at 46% 18%,
+            rgba(255,255,255,.55),
+            transparent
+        ),
+
+        radial-gradient(
+            1px 1px at 68% 34%,
+            rgba(255,255,255,.45),
+            transparent
+        ),
+
+        radial-gradient(
+            1px 1px at 83% 76%,
+            rgba(255,255,255,.55),
+            transparent
+        ),
+
+        radial-gradient(
+            1px 1px at 92% 17%,
+            rgba(255,255,255,.4),
+            transparent
+        );
+
+    opacity:.7;
+
+}
+
+
+/* =========================================================
+                         主容器
+========================================================= */
+
+.app{
+
+    width:min(720px,94vw);
+
+    padding:
+        clamp(10px,2.5vh,18px)
+        0
+        12px;
+
+    position:relative;
+
+    z-index:1;
+
+}
+
+
+/* =========================================================
+                         顶部
+========================================================= */
+
+.topbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:18px;
+
+}
+
+
+.back{
+
+    color:var(--muted);
+
+    text-decoration:none;
+
+    font-size:13px;
+
+    transition:.15s;
+
+}
+
+
+.back:hover{
+
+    color:var(--text);
+
+    transform:translateX(-2px);
+
+}
+
+
+.brand{
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    letter-spacing:2px;
+
+}
+
+
+/* =========================================================
+                         标题
+========================================================= */
+
+.header{
+
+    text-align:center;
+
+    margin-bottom:18px;
+
+}
+
+
+h1{
+
+    margin:0;
+
+    font-size:32px;
+
+    letter-spacing:5px;
+
+    font-weight:700;
+
+}
+
+
+.subtitle{
+
+    margin-top:6px;
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    letter-spacing:3px;
+
+}
+
+
+/* =========================================================
+                         游戏区域
+========================================================= */
+
+.game-panel{
+
+    background:
+        rgba(14,20,32,.92);
+
+    border:
+        1px solid var(--line);
+
+    border-radius:16px;
+
+    padding:
+        clamp(10px,1.8vh,18px);
+
+    box-shadow:
+        0 20px 70px rgba(0,0,0,.35);
+
+    backdrop-filter:
+        blur(8px);
+
+}
+
+
+/* =========================================================
+                         状态栏
+========================================================= */
+
+.status{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:14px;
+
+    padding:
+        10px
+        13px;
+
+    background:#0a101a;
+
+    border:
+        1px solid #202b3e;
+
+    border-radius:9px;
+
+    font-size:13px;
+
+}
+
+
+.status-label{
+
+    color:var(--muted);
+
+}
+
+
+.score{
+
+    color:var(--accent);
+
+    font-size:17px;
+
+    font-weight:700;
+
+}
+
+
+/* =========================================================
+                         游戏区域
+========================================================= */
+
+.board-wrap{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    width:100%;
+
+    padding:4px;
+
+}
+
+
+/* =========================================================
+                         Canvas
+========================================================= */
+
+#gameCanvas{
+
+    width:min(
+        360px,
+        52vh,
+        82vw
+    );
+
+    height:auto;
+
+    aspect-ratio:3 / 5;
+
+    display:block;
+
+    background:#5cc2e0;
+
+    border:
+        1px solid #27344a;
+
+    border-radius:7px;
+
+    box-shadow:
+        0 0 35px rgba(0,0,0,.45);
+
+    image-rendering:pixelated;
+
+    image-rendering:crisp-edges;
+
+    touch-action:none;
+
+}
+
+
+/* =========================================================
+                         音乐按钮
+========================================================= */
+
+.music-button{
+
+    position:absolute;
+
+    top:10px;
+
+    right:10px;
+
+    width:36px;
+
+    height:36px;
+
+    border:
+        1px solid #263247;
+
+    border-radius:8px;
+
+    background:#111927;
+
+    color:var(--text);
+
+    font-size:15px;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+}
+
+
+.music-button:hover{
+
+    background:#182234;
+
+}
+
+
+.music-button:active{
+
+    transform:scale(.94);
+
+}
+
+
+/* =========================================================
+                         操作提示
+========================================================= */
+
+.controls{
+
+    margin-top:16px;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:7px;
+
+}
+
+
+.control{
+
+    text-align:center;
+
+    padding:
+        8px
+        4px;
+
+    background:#111927;
+
+    border:
+        1px solid #202b3e;
+
+    border-radius:7px;
+
+    color:var(--muted);
+
+    font-size:11px;
+
+}
+
+
+.control b{
+
+    display:block;
+
+    color:var(--text);
+
+    margin-bottom:3px;
+
+    font-size:12px;
+
+}
+
+
+/* =========================================================
+                         底部
+========================================================= */
+
+.footer{
+
+    text-align:center;
+
+    margin-top:12px;
+
+    color:#566276;
+
+    font-size:11px;
+
+    line-height:1.6;
+
+}
+
+
+/* =========================================================
+                         游戏结束遮罩
+========================================================= */
+
+.overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+        rgba(3,6,12,.72);
+
+    backdrop-filter:
+        blur(5px);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.2s;
+
+    z-index:10;
+
+}
+
+
+.overlay.show{
+
+    opacity:1;
+
+    pointer-events:auto;
+
+}
+
+
+.gameover-box{
+
+    width:min(340px,86vw);
+
+    padding:28px;
+
+    text-align:center;
+
+    background:#101827;
+
+    border:
+        1px solid #2b3850;
+
+    border-radius:15px;
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.5);
+
+}
+
+
+.gameover-title{
+
+    font-size:26px;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+    margin-bottom:8px;
+
+}
+
+
+.gameover-score{
+
+    color:var(--muted);
+
+    margin-bottom:22px;
+
+}
+
+
+.restart{
+
+    border:
+        1px solid #315a4b;
+
+    background:#17352d;
+
+    color:#b9f3db;
+
+    padding:
+        10px
+        24px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font:inherit;
+
+}
+
+
+.restart:hover{
+
+    background:#1c4539;
+
+}
+
+
+/* =========================================================
+                         手机
+========================================================= */
+
+@media(max-width:520px){
+
+    .app{
+
+        width:94vw;
+
+        padding:
+            12px
+            0
+            16px;
+
+    }
+
+
+    .topbar{
+
+        margin-bottom:12px;
+
+    }
+
+
+    .header{
+
+        margin-bottom:12px;
+
+    }
+
+
+    h1{
+
+        font-size:27px;
+
+        letter-spacing:4px;
+
+    }
+
+
+    .subtitle{
+
+        font-size:10px;
+
+        letter-spacing:2px;
+
+    }
+
+
+    .game-panel{
+
+        padding:10px;
+
+        border-radius:12px;
+
+    }
+
+
+    .status{
+
+        margin-bottom:10px;
+
+        padding:
+            8px
+            11px;
+
+    }
+
+
+    .board-wrap{
+
+        padding:2px;
+
+    }
+
+
+    #gameCanvas{
+
+        width:min(
+            330px,
+            78vw,
+            calc(100vh - 250px)
+        );
+
+        height:auto;
+
+        aspect-ratio:3 / 5;
+
+    }
+
+
+    .controls{
+
+        margin-top:10px;
+
+        grid-template-columns:
+            repeat(4,1fr);
+
+        gap:6px;
+
+    }
+
+
+    .control{
+
+        padding:
+            7px
+            3px;
+
+        font-size:10px;
+
+    }
+
+
+    .control b{
+
+        font-size:11px;
+
+        margin-bottom:2px;
+
+    }
+
+
+    .footer{
+
+        margin-top:10px;
+
+        font-size:10px;
+
+    }
+
+
+    .music-button{
+
+        width:34px;
+
+        height:34px;
+
+        top:8px;
+
+        right:8px;
+
+    }
+
+}
+
+
+/* =========================================================
+                  桌面端矮窗口
+========================================================= */
+
+@media(
+    min-width:521px
+) and (max-height:800px){
+
+    .app{
+
+        padding-top:8px;
+
+        padding-bottom:8px;
+
+    }
+
+
+    .topbar{
+
+        margin-bottom:10px;
+
+    }
+
+
+    .header{
+
+        margin-bottom:10px;
+
+    }
+
+
+    h1{
+
+        font-size:28px;
+
+    }
+
+
+    .subtitle{
+
+        margin-top:4px;
+
+        font-size:10px;
+
+    }
+
+
+    .game-panel{
+
+        padding:10px;
+
+    }
+
+
+    .status{
+
+        margin-bottom:8px;
+
+        padding:
+            7px
+            10px;
+
+    }
+
+
+    #gameCanvas{
+
+        width:min(
+            310px,
+            55vh
+        );
+
+    }
+
+
+    .controls{
+
+        margin-top:8px;
+
+    }
+
+
+    .control{
+
+        padding:
+            6px
+            3px;
+
+        font-size:10px;
+
+    }
+
+
+    .control b{
+
+        font-size:11px;
+
+        margin-bottom:2px;
+
+    }
+
+
+    .footer{
+
+        margin-top:8px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+<div class="topbar">
+
+    <a
+        href="../../index.html"
+        class="back">
+
+        ← Game Library
+
+    </a>
+
+
+    <div class="brand">
+        CHENZI
+    </div>
+
+</div>
+
+
+<header class="header">
+
+    <h1>FLAPPY BIRD</h1>
+
+    <div class="subtitle">
+        CLASSIC ARCADE FLIGHT
+    </div>
+
+</header>
+
+
+<div class="game-panel">
+
+
+    <div class="status">
+
+        <span
+            class="status-label"
+            id="statusText">
+
+            READY
+
+        </span>
+
+
+        <span
+            class="score"
+            id="score">
+
+            0
+
+        </span>
+
+    </div>
+
+
+    <div class="board-wrap">
+
+        <canvas
+            id="gameCanvas"
+            width="600"
+            height="1000">
+        </canvas>
+
+    </div>
+
+
+    <div class="controls">
+
+        <div class="control">
+
+            <b>SPACE</b>
+
+            FLAP
+
+        </div>
+
+
+        <div class="control">
+
+            <b>CLICK</b>
+
+            FLAP
+
+        </div>
+
+
+        <div class="control">
+
+            <b>TOUCH</b>
+
+            FLAP
+
+        </div>
+
+
+        <div class="control">
+
+            <b>ESC</b>
+
+            RETURN
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="footer">
+
+    SPACE / CLICK / TOUCH · Flap Bird
+
+</div>
+
+
+</div>
+
+
+<button
+    class="music-button"
+    id="musicButton"
+    aria-label="Toggle music">
+
+    🔊
+
+</button>
+
+
+<div
+    class="overlay"
+    id="gameOverOverlay">
+
+    <div class="gameover-box">
+
+        <div class="gameover-title">
+
+            GAME OVER
+
+        </div>
+
+
+        <div class="gameover-score">
+
+            SCORE
+
+            <strong id="finalScore">
+                0
+            </strong>
+
+            <br>
+
+            BEST
+
+            <strong id="finalBest">
+                0
+            </strong>
+
+        </div>
+
+
+        <button
+            class="restart"
+            id="restart">
+
+            PLAY AGAIN
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<audio
+    id="bgm"
+    src="assets/flappy-bird-bgm.mp3"
+    loop
+    preload="auto">
+</audio>
+
+
+<script>
+
+/* =========================================================
+                         Canvas
+========================================================= */
+
+const canvas =
+    document.getElementById(
+        "gameCanvas"
+    );
+
+const ctx =
+    canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled =
+    false;
+
+
+const PIXEL = 50;
+
+const W = 12;
+
+const H = 20;
+
+
+/* =========================================================
+                         游戏参数
+========================================================= */
+
+const groundHeight = 1.35;
+
+const gravity = -28;
+
+const jumpVelocity = 10;
+
+const birdX = 3.0;
+
+const birdR = 0.38;
+
+const pipeWidth = 1.45;
+
+const pipeSpeed = 5.2;
+
+const pipeSpacing = 5.2;
+
+const gap = 5.2;
+
+const numPipes = 3;
+
+
+/* =========================================================
+                         游戏状态
+========================================================= */
+
+let birdY = 10;
+
+let velocityY = 0;
+
+let birdAngle = 0;
+
+let targetAngle = 0;
+
+let score = 0;
+
+let bestScore =
+    Number(
+        localStorage.getItem(
+            "flappyBirdBest"
+        ) || 0
+    );
+
+let started = false;
+
+let gameOver = false;
+
+let idleTime = 0;
+
+
+/* =========================================================
+                         管道
+========================================================= */
+
+const pipes = [];
+
+
+function randomPipeTop(){
+
+    return 9.0 +
+        Math.random() * 6.0;
+
+}
+
+
+function createPipes(){
+
+    pipes.length = 0;
+
+
+    for(
+        let i=0;
+        i<numPipes;
+        i++
+    ){
+
+        const top =
+            randomPipeTop();
+
+
+        pipes.push({
+
+            x:
+                W +
+                2 +
+                i * pipeSpacing,
+
+            top:top,
+
+            bottom:
+                top-gap,
+
+            passed:false
+
+        });
+
+    }
+
+}
+
+
+createPipes();
+
+
+/* =========================================================
+                         鸟模型
+========================================================= */
+
+const birdBody = [
+
+    [-0.43,-0.12],
+
+    [-0.28,-0.31],
+
+    [ 0.02,-0.36],
+
+    [ 0.30,-0.27],
+
+    [ 0.44,-0.05],
+
+    [ 0.43, 0.18],
+
+    [ 0.24, 0.34],
+
+    [-0.04, 0.37],
+
+    [-0.30, 0.28],
+
+    [-0.43, 0.10]
+
+];
+
+
+const birdBelly = [
+
+    [-0.25,-0.12],
+
+    [-0.03,-0.23],
+
+    [ 0.22,-0.21],
+
+    [ 0.30,-0.08],
+
+    [ 0.16, 0.08],
+
+    [-0.12, 0.07],
+
+    [-0.28,-0.02]
+
+];
+
+
+const birdWing = [
+
+    [-0.33,0.06],
+
+    [-0.13,-0.01],
+
+    [ 0.14,-0.16],
+
+    [ 0.12,-0.27],
+
+    [-0.08,-0.25],
+
+    [-0.34,-0.13]
+
+];
+
+
+const birdBeak = [
+
+    [0.34,0.08],
+
+    [0.67,0.01],
+
+    [0.68,-0.08],
+
+    [0.36,-0.12]
+
+];
+
+
+const beakLight = [
+
+    [0.38,0.04],
+
+    [0.62,0.015],
+
+    [0.60,-0.01],
+
+    [0.38,-0.04]
+
+];
+
+
+/* =========================================================
+                         坐标转换
+========================================================= */
+
+function sx(x){
+
+    return x * PIXEL;
+
+}
+
+
+function sy(y){
+
+    return (
+        H - y
+    ) * PIXEL;
+
+}
+
+
+/* =========================================================
+                         多边形
+========================================================= */
+
+function polygon(
+    points,
+    fill,
+    stroke=null,
+    lineWidth=0.02
+){
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        sx(points[0][0]),
+        sy(points[0][1])
+    );
+
+
+    for(
+        let i=1;
+        i<points.length;
+        i++
+    ){
+
+        ctx.lineTo(
+            sx(points[i][0]),
+            sy(points[i][1])
+        );
+
+    }
+
+
+    ctx.closePath();
+
+
+    ctx.fillStyle =
+        fill;
+
+    ctx.fill();
+
+
+    if(stroke){
+
+        ctx.strokeStyle =
+            stroke;
+
+        ctx.lineWidth =
+            lineWidth * PIXEL;
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================================================
+                         天空
+========================================================= */
+
+function drawSky(){
+
+    ctx.fillStyle =
+        "#5cc2e0";
+
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    ctx.fillStyle =
+        "rgba(120,210,230,.25)";
+
+
+    for(
+        const p of skyParticles
+    ){
+
+        ctx.fillRect(
+            sx(p.x),
+            sy(p.y),
+            2,
+            2
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+                         天空颗粒
+========================================================= */
+
+const skyParticles = [];
+
+
+for(
+    let i=0;
+    i<250;
+    i++
+){
+
+    skyParticles.push({
+
+        x:
+            Math.random() * W,
+
+        y:
+            groundHeight +
+            Math.random() *
+            (H-groundHeight)
+
+    });
+
+}
+
+
+/* =========================================================
+                         云朵
+========================================================= */
+
+function drawClouds(){
+
+    const clouds = [
+
+        [0.7,15.8,1.3],
+
+        [4.7,17.0,0.9],
+
+        [8.2,15.0,1.2],
+
+        [10.0,18.0,0.7]
+
+    ];
+
+
+    ctx.fillStyle =
+        "#f3f8f2";
+
+
+    for(
+        const [x,y,s]
+        of clouds
+    ){
+
+        ctx.fillRect(
+
+            sx(x),
+
+            sy(y+0.38*s),
+
+            1.7*s*PIXEL,
+
+            0.38*s*PIXEL
+
+        );
+
+
+        ctx.fillRect(
+
+            sx(x+0.32*s),
+
+            sy(y+0.80*s),
+
+            0.70*s*PIXEL,
+
+            0.55*s*PIXEL
+
+        );
+
+
+        ctx.fillRect(
+
+            sx(x+0.95*s),
+
+            sy(y+0.55*s),
+
+            0.62*s*PIXEL,
+
+            0.42*s*PIXEL
+
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+                         远山
+========================================================= */
+
+function drawMountains(){
+
+    const y = [
+
+        3.4,
+        4.0,
+        3.6,
+        4.7,
+        4.0,
+        4.8,
+        3.8,
+        4.5,
+        3.7,
+        4.8,
+        3.9,
+        4.4,
+        3.6,
+        4.7,
+        3.8,
+        4.3,
+        3.5,
+        4.0
+
+    ];
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        sx(0),
+        sy(groundHeight)
+    );
+
+
+    for(
+        let i=0;
+        i<y.length;
+        i++
+    ){
+
+        const x =
+            i * W / 17;
+
+
+        ctx.lineTo(
+            sx(x),
+            sy(y[i])
+        );
+
+    }
+
+
+    ctx.lineTo(
+        sx(W),
+        sy(groundHeight)
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fillStyle =
+        "#8cbea8";
+
+    ctx.fill();
+
+}
+
+
+/* =========================================================
+                         地面
+========================================================= */
+
+const groundParticlesDark = [];
+
+const groundParticlesLight = [];
+
+const grassBlades = [];
+
+
+for(
+    let i=0;
+    i<140;
+    i++
+){
+
+    groundParticlesDark.push({
+
+        x:
+            Math.random() * W,
+
+        y:
+            Math.random() *
+            (groundHeight-0.15)
+
+    });
+
+}
+
+
+for(
+    let i=0;
+    i<100;
+    i++
+){
+
+    groundParticlesLight.push({
+
+        x:
+            Math.random() * W,
+
+        y:
+            Math.random() *
+            (groundHeight-0.20)
+
+    });
+
+}
+
+
+for(
+    let i=0;
+    i<35;
+    i++
+){
+
+    grassBlades.push(
+        Math.random()*W
+    );
+
+}
+
+
+function drawGround(){
+
+    ctx.fillStyle =
+        "#ab6e33";
+
+
+    ctx.fillRect(
+
+        0,
+
+        sy(groundHeight),
+
+        canvas.width,
+
+        groundHeight*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#6bb933";
+
+
+    ctx.fillRect(
+
+        0,
+
+        sy(groundHeight+0.18),
+
+        canvas.width,
+
+        0.28*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#4d9624";
+
+
+    ctx.fillRect(
+
+        0,
+
+        sy(groundHeight+0.18),
+
+        canvas.width,
+
+        0.07*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#854f23";
+
+
+    for(
+        const p
+        of groundParticlesDark
+    ){
+
+        ctx.fillRect(
+
+            sx(p.x),
+
+            sy(p.y+0.055),
+
+            2.75,
+
+            2.75
+
+        );
+
+    }
+
+
+    ctx.fillStyle =
+        "#c4823f";
+
+
+    for(
+        const p
+        of groundParticlesLight
+    ){
+
+        ctx.fillRect(
+
+            sx(p.x),
+
+            sy(p.y+0.035),
+
+            1.75,
+
+            1.75
+
+        );
+
+    }
+
+
+    ctx.strokeStyle =
+        "#3f8c20";
+
+    ctx.lineWidth =
+        0.9;
+
+
+    for(
+        const x
+        of grassBlades
+    ){
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+
+            sx(x),
+
+            sy(groundHeight+0.03)
+
+        );
+
+
+        ctx.lineTo(
+
+            sx(x+0.05),
+
+            sy(groundHeight+0.16)
+
+        );
+
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================================================
+                         管道
+========================================================= */
+
+function drawPipe(pipe){
+
+    const x =
+        pipe.x;
+
+    const top =
+        pipe.top;
+
+    const bottom =
+        pipe.bottom;
+
+
+    ctx.fillStyle =
+        "#337a1f";
+
+
+    ctx.fillRect(
+
+        sx(x-0.03),
+
+        sy(H),
+
+        (pipeWidth+0.06)*PIXEL,
+
+        (H-top)*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#61ba2e";
+
+
+    ctx.fillRect(
+
+        sx(x),
+
+        sy(H),
+
+        pipeWidth*PIXEL,
+
+        (H-top)*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#9adf47";
+
+
+    ctx.fillRect(
+
+        sx(x+0.16),
+
+        sy(H),
+
+        0.17*PIXEL,
+
+        (H-top-0.02)*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#57ad27";
+
+
+    ctx.fillRect(
+
+        sx(x-0.16),
+
+        sy(top),
+
+        (pipeWidth+0.32)*PIXEL,
+
+        0.43*PIXEL
+
+    );
+
+
+    ctx.strokeStyle =
+        "#2e6918";
+
+    ctx.lineWidth =
+        1.75;
+
+
+    ctx.strokeRect(
+
+        sx(x-0.16),
+
+        sy(top),
+
+        (pipeWidth+0.32)*PIXEL,
+
+        0.43*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#337a1f";
+
+
+    ctx.fillRect(
+
+        sx(x-0.03),
+
+        sy(bottom),
+
+        (pipeWidth+0.06)*PIXEL,
+
+        (bottom-groundHeight)*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#61ba2e";
+
+
+    ctx.fillRect(
+
+        sx(x),
+
+        sy(bottom),
+
+        pipeWidth*PIXEL,
+
+        (bottom-groundHeight)*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#9adf47";
+
+
+    ctx.fillRect(
+
+        sx(x+0.16),
+
+        sy(bottom),
+
+        0.17*PIXEL,
+
+        (bottom-groundHeight)*PIXEL
+
+    );
+
+
+    ctx.fillStyle =
+        "#57ad27";
+
+
+    ctx.fillRect(
+
+        sx(x-0.16),
+
+        sy(bottom+0.43),
+
+        (pipeWidth+0.32)*PIXEL,
+
+        0.43*PIXEL
+
+    );
+
+
+    ctx.strokeStyle =
+        "#2e6918";
+
+
+    ctx.strokeRect(
+
+        sx(x-0.16),
+
+        sy(bottom+0.43),
+
+        (pipeWidth+0.32)*PIXEL,
+
+        0.43*PIXEL
+
+    );
+
+}
+
+
+/* =========================================================
+                         鸟
+========================================================= */
+
+function drawBird(){
+
+    ctx.save();
+
+
+    ctx.translate(
+
+        sx(birdX),
+
+        sy(birdY)
+
+    );
+
+
+    /*
+        保持当前已经修好的方向：
+
+        birdAngle = 70
+        → 鸟头向上
+
+        birdAngle = -35
+        → 鸟头向下
+    */
+
+    ctx.rotate(
+
+        -birdAngle *
+        Math.PI /
+        180
+
+    );
+
+
+    function p(points){
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+
+            points[0][0]*PIXEL,
+
+            -points[0][1]*PIXEL
+
+        );
+
+
+        for(
+            let i=1;
+            i<points.length;
+            i++
+        ){
+
+            ctx.lineTo(
+
+                points[i][0]*PIXEL,
+
+                -points[i][1]*PIXEL
+
+            );
+
+        }
+
+
+        ctx.closePath();
+
+    }
+
+
+    p(birdBody);
+
+    ctx.fillStyle =
+        "#ffc70d";
+
+    ctx.strokeStyle =
+        "#8c5905";
+
+    ctx.lineWidth =
+        0.025*PIXEL;
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+    p(birdBelly);
+
+    ctx.fillStyle =
+        "#ffe05a";
+
+    ctx.fill();
+
+
+    p(birdWing);
+
+    ctx.fillStyle =
+        "#eb8f08";
+
+    ctx.strokeStyle =
+        "#824900";
+
+    ctx.lineWidth =
+        0.018*PIXEL;
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+    p(birdBeak);
+
+    ctx.fillStyle =
+        "#f26b08";
+
+    ctx.strokeStyle =
+        "#8d3e05";
+
+    ctx.lineWidth =
+        0.018*PIXEL;
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+    p(beakLight);
+
+    ctx.fillStyle =
+        "#ff9b16";
+
+    ctx.fill();
+
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+
+        0.23*PIXEL,
+
+        -0.25*PIXEL,
+
+        0.11*PIXEL,
+
+        0,
+
+        Math.PI*2
+
+    );
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#8c5905";
+
+    ctx.lineWidth =
+        0.018*PIXEL;
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#0d0d09";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+
+        0.275*PIXEL,
+
+        -0.275*PIXEL,
+
+        0.038*PIXEL,
+
+        0,
+
+        Math.PI*2
+
+    );
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+                         HUD
+========================================================= */
+
+function drawScore(){
+
+    if(
+        !started ||
+        gameOver
+    ){
+
+        return;
+
+    }
+
+
+    ctx.textAlign =
+        "center";
+
+    ctx.font =
+        "bold 48px Arial";
+
+
+    ctx.fillStyle =
+        "#355b60";
+
+
+    ctx.fillText(
+
+        score,
+
+        sx(W/2+0.025),
+
+        sy(H-1.10)+3.5
+
+    );
+
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    ctx.fillText(
+
+        score,
+
+        sx(W/2),
+
+        sy(H-1.10)
+
+    );
+
+}
+
+
+/* =========================================================
+                     Canvas 内开始界面
+========================================================= */
+
+function drawGameOverlay(){
+
+    if(!started){
+
+        drawGameText(
+
+            "FLAPPY BIRD",
+
+            W/2,
+
+            H/2+2.65,
+
+            52,
+
+            "#ffffff"
+
+        );
+
+
+        drawGameText(
+
+            "GET READY!",
+
+            W/2,
+
+            H/2+1.35,
+
+            36,
+
+            "#ffffff"
+
+        );
+
+
+        drawInstructionBox(
+            "SPACE  开始游戏"
+        );
+
+    }
+
+
+    if(gameOver){
+
+        drawGameText(
+
+            "GAME OVER",
+
+            W/2,
+
+            H/2+2.80,
+
+            52,
+
+            "#ffffff"
+
+        );
+
+
+        drawGameText(
+
+            `SCORE  ${score}     BEST  ${bestScore}`,
+
+            W/2,
+
+            H/2+1.55,
+
+            32,
+
+            "#ffffff"
+
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+                         Canvas 文字
+========================================================= */
+
+function drawGameText(
+    text,
+    x,
+    y,
+    size,
+    color
+){
+
+    ctx.textAlign =
+        "center";
+
+    ctx.font =
+        `bold ${size}px Arial`;
+
+
+    ctx.fillStyle =
+        "#406c70";
+
+
+    ctx.fillText(
+
+        text,
+
+        sx(x+0.035),
+
+        sy(y)+3.5
+
+    );
+
+
+    ctx.fillStyle =
+        color;
+
+
+    ctx.fillText(
+
+        text,
+
+        sx(x),
+
+        sy(y)
+
+    );
+
+}
+
+
+/* =========================================================
+                     提示框
+========================================================= */
+
+function drawInstructionBox(text){
+
+    /*
+        Canvas 当前没有 setTransform()
+
+        游戏逻辑坐标：
+            12 × 20
+
+        Canvas 实际尺寸：
+            600 × 1000
+
+        所以这里必须通过
+        sx() / sy()
+        转换成 Canvas 像素坐标。
+    */
+
+
+    /* =====================================================
+                         框的位置
+    ===================================================== */
+
+    const x = 3.15;
+
+    const y = 6.65;
+
+    const w = 5.70;
+
+    const h = 0.95;
+
+
+    /* =====================================================
+                         转换
+    ===================================================== */
+
+    const px =
+        sx(x);
+
+    const py =
+        sy(y + h);
+
+    const pw =
+        w * PIXEL;
+
+    const ph =
+        h * PIXEL;
+
+
+    /* =====================================================
+                         提示框
+    ===================================================== */
+
+    ctx.save();
+
+
+    ctx.fillStyle =
+        "#f2f1e4";
+
+    ctx.strokeStyle =
+        "#4c6868";
+
+    ctx.lineWidth =
+        1.5;
+
+
+    ctx.beginPath();
+
+
+    ctx.roundRect(
+
+        px,
+        py,
+        pw,
+        ph,
+        5
+
+    );
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+    /* =====================================================
+                         文字
+    ===================================================== */
+
+    ctx.fillStyle =
+        "#405454";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.textBaseline =
+        "middle";
+
+    ctx.font =
+        "bold 24px Arial";
+
+
+    ctx.fillText(
+
+        text,
+
+        px + pw / 2,
+
+        py + ph / 2
+
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+                         音频
+========================================================= */
+
+let audioContext = null;
+
+
+function initAudio(){
+
+    if(!audioContext){
+
+        audioContext =
+            new(
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+
+    if(
+        audioContext.state ===
+        "suspended"
+    ){
+
+        audioContext.resume();
+
+    }
+
+}
+
+
+/* =========================================================
+                         跳跃音效
+========================================================= */
+
+function jumpSound(){
+
+    initAudio();
+
+
+    const osc =
+        audioContext
+        .createOscillator();
+
+
+    const gain =
+        audioContext
+        .createGain();
+
+
+    osc.type =
+        "square";
+
+
+    osc.frequency.setValueAtTime(
+
+        620,
+
+        audioContext.currentTime
+
+    );
+
+
+    osc.frequency
+        .exponentialRampToValueAtTime(
+
+            900,
+
+            audioContext.currentTime+0.08
+
+        );
+
+
+    gain.gain.setValueAtTime(
+
+        0.0001,
+
+        audioContext.currentTime
+
+    );
+
+
+    gain.gain
+        .exponentialRampToValueAtTime(
+
+            0.12,
+
+            audioContext.currentTime+0.01
+
+        );
+
+
+    gain.gain
+        .exponentialRampToValueAtTime(
+
+            0.0001,
+
+            audioContext.currentTime+0.09
+
+        );
+
+
+    osc.connect(gain);
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+    osc.start();
+
+    osc.stop(
+        audioContext.currentTime+0.10
+    );
+
+}
+
+
+/* =========================================================
+                         死亡音效
+========================================================= */
+
+function deathSound(){
+
+    initAudio();
+
+
+    const osc =
+        audioContext
+        .createOscillator();
+
+
+    const gain =
+        audioContext
+        .createGain();
+
+
+    osc.type =
+        "square";
+
+
+    osc.frequency.setValueAtTime(
+
+        220,
+
+        audioContext.currentTime
+
+    );
+
+
+    osc.frequency
+        .exponentialRampToValueAtTime(
+
+            70,
+
+            audioContext.currentTime+0.25
+
+        );
+
+
+    gain.gain.setValueAtTime(
+
+        0.0001,
+
+        audioContext.currentTime
+
+    );
+
+
+    gain.gain
+        .exponentialRampToValueAtTime(
+
+            0.16,
+
+            audioContext.currentTime+0.01
+
+        );
+
+
+    gain.gain
+        .exponentialRampToValueAtTime(
+
+            0.0001,
+
+            audioContext.currentTime+0.25
+
+        );
+
+
+    osc.connect(gain);
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+    osc.start();
+
+    osc.stop(
+        audioContext.currentTime+0.26
+    );
+
+}
+
+
+/* =========================================================
+                         BGM
+========================================================= */
+
+const bgm =
+    document.getElementById(
+        "bgm"
+    );
+
+
+const musicButton =
+    document.getElementById(
+        "musicButton"
+    );
+
+
+let musicEnabled =
+    true;
+
+
+function startMusic(){
+
+    if(!musicEnabled)
+        return;
+
+
+    bgm.volume =
+        0.35;
+
+
+    bgm.play()
+        .catch(()=>{});
+
+}
+
+
+musicButton.addEventListener(
+
+    "click",
+
+    function(e){
+
+        e.stopPropagation();
+
+
+        musicEnabled =
+            !musicEnabled;
+
+
+        if(musicEnabled){
+
+            musicButton.textContent =
+                "🔊";
+
+
+            startMusic();
+
+        }else{
+
+            musicButton.textContent =
+                "🔇";
+
+
+            bgm.pause();
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+                         状态栏
+========================================================= */
+
+function setStatus(text){
+
+    const status =
+        document.getElementById(
+            "statusText"
+        );
+
+
+    status.textContent =
+        text;
+
+}
+
+
+/* =========================================================
+                         开始游戏
+========================================================= */
+
+function startGame(){
+
+    if(started)
+        return;
+
+
+    initAudio();
+
+    startMusic();
+
+
+    started =
+        true;
+
+
+    gameOver =
+        false;
+
+
+    setStatus(
+        "PLAYING"
+    );
+
+
+    velocityY =
+        jumpVelocity;
+
+
+    birdAngle =
+        20;
+
+
+    targetAngle =
+        20;
+
+
+    jumpSound();
+
+}
+
+
+/* =========================================================
+                         跳跃
+========================================================= */
+
+function flap(){
+
+    if(!started){
+
+        startGame();
+
+        return;
+
+    }
+
+
+    if(gameOver){
+
+        restartGame();
+
+        return;
+
+    }
+
+
+    velocityY =
+        jumpVelocity;
+
+
+    /*
+        点击瞬间抬头
+    */
+
+    birdAngle =
+        70;
+
+
+    targetAngle =
+        20;
+
+
+    jumpSound();
+
+}
+
+
+/* =========================================================
+                         鸟物理
+========================================================= */
+
+function updateBird(dt){
+
+    velocityY +=
+        gravity * dt;
+
+
+    birdY +=
+        velocityY * dt;
+
+
+    if(
+        velocityY < -2
+    ){
+
+        targetAngle =
+            Math.max(
+                -35,
+                velocityY*1.3
+            );
+
+    }else{
+
+        targetAngle =
+            20;
+
+    }
+
+
+    birdAngle +=
+
+        (
+            targetAngle -
+            birdAngle
+        ) * 0.18;
+
+}
+
+
+/* =========================================================
+                         管道更新
+========================================================= */
+
+function updatePipes(dt){
+
+    for(
+        const pipe
+        of pipes
+    ){
+
+        pipe.x -=
+            pipeSpeed * dt;
+
+
+        if(
+            pipe.x <
+            -pipeWidth-0.6
+        ){
+
+            const rightMost =
+                Math.max(
+                    ...pipes.map(
+                        p => p.x
+                    )
+                );
+
+
+            pipe.x =
+                rightMost +
+                pipeSpacing;
+
+
+            pipe.top =
+                randomPipeTop();
+
+
+            pipe.bottom =
+                pipe.top-gap;
+
+
+            pipe.passed =
+                false;
+
+        }
+
+
+        if(
+
+            !pipe.passed &&
+
+            pipe.x +
+            pipeWidth <
+            birdX
+
+        ){
+
+            pipe.passed =
+                true;
+
+
+            score++;
+
+
+            if(
+                score >
+                bestScore
+            ){
+
+                bestScore =
+                    score;
+
+
+                localStorage.setItem(
+
+                    "flappyBirdBest",
+
+                    bestScore
+
+                );
+
+            }
+
+
+            document
+                .getElementById(
+                    "score"
+                )
+                .textContent =
+                score;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+                         碰撞
+========================================================= */
+
+function checkCollision(){
+
+    if(
+        birdY-birdR <=
+        groundHeight
+    ){
+
+        endGame();
+
+        return;
+
+    }
+
+
+    if(
+        birdY+birdR >= H
+    ){
+
+        endGame();
+
+        return;
+
+    }
+
+
+    const birdLeft =
+        birdX-birdR;
+
+
+    const birdRight =
+        birdX+birdR;
+
+
+    const birdBottom =
+        birdY-birdR;
+
+
+    const birdTop =
+        birdY+birdR;
+
+
+    for(
+        const pipe
+        of pipes
+    ){
+
+        const pipeLeft =
+            pipe.x;
+
+
+        const pipeRight =
+            pipe.x+pipeWidth;
+
+
+        const horizontalCollision =
+
+            birdRight >
+            pipeLeft &&
+
+            birdLeft <
+            pipeRight;
+
+
+        if(horizontalCollision){
+
+            const verticalCollision =
+
+                birdTop >
+                pipe.top ||
+
+                birdBottom <
+                pipe.bottom;
+
+
+            if(verticalCollision){
+
+                endGame();
+
+                return;
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+                         游戏结束
+========================================================= */
+
+function endGame(){
+
+    if(gameOver)
+        return;
+
+
+    gameOver =
+        true;
+
+
+    setStatus(
+        "GAME OVER"
+    );
+
+
+    if(
+        score >
+        bestScore
+    ){
+
+        bestScore =
+            score;
+
+
+        localStorage.setItem(
+
+            "flappyBirdBest",
+
+            bestScore
+
+        );
+
+    }
+
+
+    document
+        .getElementById(
+            "finalScore"
+        )
+        .textContent =
+        score;
+
+
+    document
+        .getElementById(
+            "finalBest"
+        )
+        .textContent =
+        bestScore;
+
+
+    document
+        .getElementById(
+            "gameOverOverlay"
+        )
+        .classList
+        .add("show");
+
+
+    deathSound();
+
+}
+
+
+/* =========================================================
+                         重新开始
+========================================================= */
+
+function restartGame(){
+
+    birdY =
+        10;
+
+
+    velocityY =
+        0;
+
+
+    birdAngle =
+        0;
+
+
+    targetAngle =
+        20;
+
+
+    score =
+        0;
+
+
+    gameOver =
+        false;
+
+
+    started =
+        true;
+
+
+    createPipes();
+
+
+    document
+        .getElementById(
+            "score"
+        )
+        .textContent =
+        "0";
+
+
+    document
+        .getElementById(
+            "gameOverOverlay"
+        )
+        .classList
+        .remove("show");
+
+
+    setStatus(
+        "PLAYING"
+    );
+
+
+    velocityY =
+        jumpVelocity;
+
+
+    birdAngle =
+        70;
+
+
+    targetAngle =
+        20;
+
+
+    startMusic();
+
+}
+
+
+/* =========================================================
+                         键盘
+========================================================= */
+
+document.addEventListener(
+
+    "keydown",
+
+    function(event){
+
+        if(
+            event.code ===
+            "Space"
+        ){
+
+            event.preventDefault();
+
+            flap();
+
+        }
+
+
+        if(
+            event.code ===
+            "Escape"
+        ){
+
+            window.location.href =
+                "../../index.html";
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+                         鼠标
+========================================================= */
+
+canvas.addEventListener(
+
+    "mousedown",
+
+    function(){
+
+        flap();
+
+    }
+
+);
+
+
+/* =========================================================
+                         手机触摸
+========================================================= */
+
+canvas.addEventListener(
+
+    "touchstart",
+
+    function(event){
+
+        event.preventDefault();
+
+        flap();
+
+    },
+
+    {
+        passive:false
+    }
+
+);
+
+
+/* =========================================================
+                         PLAY AGAIN
+========================================================= */
+
+document
+    .getElementById(
+        "restart"
+    )
+    .addEventListener(
+
+        "click",
+
+        function(){
+
+            restartGame();
+
+        }
+
+    );
+
+
+/* =========================================================
+                         绘制
+========================================================= */
+
+function draw(){
+
+    drawSky();
+
+    drawClouds();
+
+    drawMountains();
+
+
+    for(
+        const pipe
+        of pipes
+    ){
+
+        drawPipe(pipe);
+
+    }
+
+
+    drawGround();
+
+    drawBird();
+
+    drawScore();
+
+    drawGameOverlay();
+
+}
+
+
+/* =========================================================
+                     开始界面动画
+========================================================= */
+
+let lastTime =
+    performance.now();
+
+
+/* =========================================================
+                         主循环
+========================================================= */
+
+function gameLoop(now){
+
+    const dt =
+        Math.min(
+
+            (now-lastTime)/1000,
+
+            0.033
+
+        );
+
+
+    lastTime =
+        now;
+
+
+    if(!started){
+
+        idleTime +=
+            dt;
+
+
+        birdY =
+
+            10 +
+            0.18 *
+            Math.sin(
+                idleTime*3
+            );
+
+
+        targetAngle =
+            8;
+
+
+        birdAngle +=
+
+            (
+                targetAngle -
+                birdAngle
+            ) * 0.12;
+
+    }
+
+
+    if(
+        started &&
+        !gameOver
+    ){
+
+        updateBird(dt);
+
+        updatePipes(dt);
+
+        checkCollision();
+
+    }
+
+
+    draw();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================================
+                         初始化
+========================================================= */
+
+document
+    .getElementById(
+        "finalBest"
+    )
+    .textContent =
+    bestScore;
+
+
+draw();
+
+
+requestAnimationFrame(
+    gameLoop
+);
+
+</script>
+
+</body>
+
+</html>

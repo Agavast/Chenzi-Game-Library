@@ -1,0 +1,2513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,user-scalable=no">
+
+<title>MINESWEEPER</title>
+
+<style>
+
+:root{
+    --bg:#05070c;
+    --panel:#0d111a;
+    --panel2:#131925;
+    --line:#252d3d;
+    --text:#f2f5fa;
+    --muted:#7f8ba0;
+    --blue:#315cff;
+    --red:#ff3b30;
+    --green:#43d17c;
+}
+
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:
+    radial-gradient(
+        circle at 50% -15%,
+        #18345f 0%,
+        #0a1932 28%,
+        #050d1c 65%,
+        #020611 100%
+    );
+
+    color:var(--text);
+    font-family:
+        Inter,
+        "Segoe UI",
+        "Microsoft YaHei",
+        Arial,
+        sans-serif;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    overflow-x:hidden;
+}
+
+button{
+    border:0;
+    outline:0;
+    cursor:pointer;
+    font:inherit;
+    -webkit-user-select:none;
+    user-select:none;
+}
+
+.app{
+    width:min(1180px,96vw);
+    padding:28px 0 40px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header{
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    margin-bottom:18px;
+    min-height:54px;
+}
+
+.header-left{
+    justify-self:start;
+
+    color:#9ba6b8;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.4px;
+
+    text-decoration:none;
+
+    transition:
+        color .15s,
+        opacity .15s;
+}
+
+.header-left:hover{
+    color:#dce2eb;
+}
+
+.header-center{
+    text-align:center;
+}
+
+.header-center h1{
+    margin:0;
+
+    font-size:30px;
+    line-height:1;
+
+    letter-spacing:2px;
+    font-weight:900;
+
+    color:#f2f5fa;
+}
+
+.header-center p{
+    margin:6px 0 0;
+
+    color:var(--muted);
+
+    font-size:10px;
+    line-height:1;
+
+    letter-spacing:1.2px;
+    font-weight:600;
+}
+
+.header-right{
+    justify-self:end;
+
+    color:#9ba6b8;
+
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.4px;
+}
+
+
+/* =========================================================
+   GAME LAYOUT
+========================================================= */
+
+.game-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 245px;
+    gap:16px;
+    align-items:start;
+}
+
+.game-card,
+.side-card{
+    background:rgba(10,14,22,.94);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.4),
+        inset 0 1px rgba(255,255,255,.025);
+}
+
+.game-card{
+    padding:14px;
+    min-width:0;
+}
+
+
+/* =========================================================
+   BOARD AREA
+========================================================= */
+
+.board-wrap{
+    position:relative;
+    width:100%;
+    max-height:calc(100vh - 125px);
+
+    background:#090c12;
+    border-radius:11px;
+    overflow:hidden;
+    border:1px solid #1c2432;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    min-height:400px;
+}
+
+.board{
+    display:grid;
+    gap:1px;
+    background:#252d3d;
+    border:2px solid #252d3d;
+    box-shadow:
+        0 15px 45px rgba(0,0,0,.4);
+
+    touch-action:none;
+
+    flex-shrink:0;
+}
+
+
+/* =========================================================
+   CELL
+========================================================= */
+
+.cell{
+    width:var(--cell-size);
+    height:var(--cell-size);
+
+    padding:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#171d28;
+    border:1px solid #30394a;
+
+    color:#fff;
+
+    font-weight:900;
+    font-size:calc(var(--cell-size) * .45);
+
+    transition:
+        background .08s,
+        transform .08s;
+
+    line-height:1;
+}
+
+.cell:hover{
+    background:#202938;
+}
+
+.cell:active{
+    transform:scale(.94);
+}
+
+.cell.open{
+    background:#dfe2e7;
+    border-color:#c8ccd2;
+    cursor:default;
+}
+
+.cell.flag{
+    color:#ff4658;
+}
+
+.cell.mine{
+    background:#ff6464;
+    color:#111;
+}
+
+.cell.exploded{
+    background:#ff3030;
+    color:#fff;
+}
+
+
+/* =========================================================
+   NUMBER COLORS
+========================================================= */
+
+.cell.n1{
+    color:#1554d1;
+}
+
+.cell.n2{
+    color:#188548;
+}
+
+.cell.n3{
+    color:#d92727;
+}
+
+.cell.n4{
+    color:#5534a8;
+}
+
+.cell.n5{
+    color:#8b3025;
+}
+
+.cell.n6{
+    color:#1597a2;
+}
+
+.cell.n7{
+    color:#222;
+}
+
+.cell.n8{
+    color:#666;
+}
+
+
+/* =========================================================
+   SIDE
+========================================================= */
+
+.side{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.side-card{
+    padding:16px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.stat{
+    padding:11px 12px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    border-radius:10px;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:10px;
+    letter-spacing:1px;
+}
+
+.stat-value{
+    margin-top:3px;
+    font-size:20px;
+    font-weight:800;
+}
+
+.mine-count{
+    color:#ff4658;
+}
+
+.timer{
+    color:#61a1ff;
+}
+
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+.controls-title{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:1px;
+    color:#aeb8c9;
+    margin-bottom:10px;
+}
+
+.control-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:7px 0;
+    color:#8994a8;
+    font-size:12px;
+}
+
+.key{
+    min-width:28px;
+    height:25px;
+    padding:0 7px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #343e50;
+    background:#151b27;
+    border-radius:5px;
+
+    color:#dce2eb;
+    font-size:11px;
+    font-weight:700;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.action-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.btn{
+    height:40px;
+    border-radius:9px;
+    border:1px solid #30394a;
+    background:#151b27;
+    color:#dce2ea;
+    font-weight:700;
+    font-size:12px;
+    transition:.15s;
+}
+
+.btn:hover{
+    background:#1c2432;
+}
+
+.btn-primary{
+    background:#315cff;
+    border-color:#315cff;
+    color:#fff;
+}
+
+.btn-primary:hover{
+    background:#4770ff;
+}
+
+.btn-danger{
+    color:#ff6b6b;
+}
+
+
+/* =========================================================
+   HELP
+========================================================= */
+
+.help{
+    color:#68758b;
+    font-size:11px;
+    line-height:1.7;
+}
+
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.overlay{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:rgba(0,0,0,.72);
+    backdrop-filter:blur(5px);
+
+    z-index:10;
+}
+
+.overlay.hidden{
+    display:none;
+}
+
+.menu{
+    width:min(420px,84%);
+    text-align:center;
+}
+
+.menu-logo{
+    font-size:44px;
+    font-weight:1000;
+    letter-spacing:5px;
+
+    color:#fff;
+
+    text-shadow:
+        0 0 18px rgba(255,255,255,.15);
+}
+
+.menu-sub{
+    color:#7e899d;
+    font-size:12px;
+    margin:6px 0 24px;
+    letter-spacing:1px;
+}
+
+.menu-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.big-btn{
+    height:46px;
+    border-radius:9px;
+    font-weight:800;
+    font-size:13px;
+}
+
+.menu-note{
+    color:#626e82;
+    font-size:10px;
+    margin-top:15px;
+    line-height:1.6;
+}
+
+
+/* =========================================================
+   MODE SELECTION
+========================================================= */
+
+.mode-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-bottom:10px;
+}
+
+.mode-btn{
+    height:58px;
+    border-radius:9px;
+
+    border:1px solid #30394a;
+    background:#151b27;
+
+    color:#dce2ea;
+
+    font-weight:800;
+    font-size:12px;
+
+    transition:.15s;
+}
+
+.mode-btn:hover{
+    background:#1d2635;
+    border-color:#43516a;
+}
+
+.mode-btn strong{
+    display:block;
+    font-size:14px;
+    color:#fff;
+    margin-bottom:3px;
+}
+
+.mode-btn span{
+    color:#7e899d;
+    font-size:10px;
+}
+
+
+/* =========================================================
+   GAME MESSAGE
+========================================================= */
+
+.game-message{
+    position:absolute;
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    pointer-events:none;
+
+    font-size:25px;
+    font-weight:900;
+
+    letter-spacing:2px;
+
+    text-shadow:
+        0 0 18px rgba(255,255,255,.25);
+
+    opacity:0;
+    transition:.2s;
+
+    z-index:5;
+}
+
+.game-message.show{
+    opacity:1;
+}
+
+.game-message.win{
+    color:#43d17c;
+}
+
+.game-message.lose{
+    color:#ff4658;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:800px){
+
+    .app{
+        width:96vw;
+        padding-top:14px;
+        padding-bottom:20px;
+    }
+
+    .header{
+        grid-template-columns:auto 1fr auto;
+        margin-bottom:10px;
+        min-height:45px;
+        gap:8px;
+    }
+
+    .header-left,
+    .header-right{
+        font-size:10px;
+        letter-spacing:.2px;
+        white-space:nowrap;
+    }
+
+    .header-center h1{
+        font-size:22px;
+        letter-spacing:1.5px;
+    }
+
+    .header-center p{
+        margin-top:4px;
+        font-size:8px;
+        letter-spacing:.8px;
+    }
+
+    .game-layout{
+        display:block;
+    }
+
+    .game-card{
+        padding:7px;
+        border-radius:11px;
+    }
+
+    .board-wrap{
+        max-height:none;
+        min-height:0;
+        padding:7px;
+    }
+
+    .side{
+        margin-top:12px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media(max-width:520px){
+
+    .header{
+        gap:5px;
+    }
+
+    .header-left,
+    .header-right{
+        font-size:9px;
+    }
+
+    .header-center h1{
+        font-size:19px;
+    }
+
+    .header-center p{
+        font-size:7px;
+    }
+
+    .board-wrap{
+        padding:4px;
+    }
+
+    .side{
+        gap:7px;
+    }
+
+    .stats{
+        gap:5px;
+    }
+
+    .stat{
+        padding:8px 10px;
+    }
+
+    .stat-value{
+        font-size:17px;
+    }
+
+    .menu-logo{
+        font-size:32px;
+    }
+
+    .mode-grid{
+        gap:6px;
+    }
+
+    .mode-btn{
+        height:54px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media(max-width:380px){
+
+    .app{
+        width:98vw;
+        padding-top:8px;
+    }
+
+    .header{
+        gap:3px;
+    }
+
+    .header-left,
+    .header-right{
+        font-size:8px;
+    }
+
+    .header-center h1{
+        font-size:17px;
+    }
+
+    .header-center p{
+        font-size:6px;
+    }
+
+    .menu{
+        width:90%;
+    }
+
+    .menu-logo{
+        font-size:27px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="header">
+
+        <a
+            href="../../index.html"
+            class="header-left">
+            ←Game Library
+        </a>
+
+
+        <div class="header-center">
+
+            <h1>Minesweeper</h1>
+
+            <p>CLASSIC GAME</p>
+
+        </div>
+
+
+        <div class="header-right">
+            CHENZI
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         GAME LAYOUT
+         ===================================================== -->
+
+    <div class="game-layout">
+
+
+        <!-- =================================================
+             GAME
+             ================================================= -->
+
+        <main class="game-card">
+
+            <div class="board-wrap">
+
+                <div
+                    class="board"
+                    id="board">
+                </div>
+
+
+                <!-- 游戏状态文字 -->
+
+                <div
+                    class="game-message"
+                    id="gameMessage">
+                </div>
+
+
+                <!-- =================================================
+                     START MENU
+                     ================================================= -->
+
+                <div
+                    class="overlay"
+                    id="overlay">
+
+                    <div class="menu">
+
+                        <div class="menu-logo">
+                            MINESWEEPER
+                        </div>
+
+                        <div class="menu-sub">
+                            CLASSIC MINE-SWEEPING · WEB EDITION
+                        </div>
+
+
+                        <div class="menu-buttons">
+
+                            <button
+                                class="big-btn btn btn-primary"
+                                id="quickStartBtn">
+                                QUICK START
+                            </button>
+
+
+                            <div class="mode-grid">
+
+                                <button
+                                    class="mode-btn"
+                                    data-rows="10"
+                                    data-cols="10"
+                                    data-mines="20"
+                                    data-classic="false">
+
+                                    <strong>10 × 10</strong>
+
+                                    <span>
+                                        20 MINES
+                                    </span>
+
+                                </button>
+
+
+                                <button
+                                    class="mode-btn"
+                                    data-rows="15"
+                                    data-cols="15"
+                                    data-mines="30"
+                                    data-classic="false">
+
+                                    <strong>15 × 15</strong>
+
+                                    <span>
+                                        30 MINES
+                                    </span>
+
+                                </button>
+
+
+                                <button
+                                    class="mode-btn"
+                                    data-rows="20"
+                                    data-cols="20"
+                                    data-mines="60"
+                                    data-classic="false">
+
+                                    <strong>20 × 20</strong>
+
+                                    <span>
+                                        60 MINES
+                                    </span>
+
+                                </button>
+
+
+                                <button
+                                    class="mode-btn"
+                                    data-rows="16"
+                                    data-cols="30"
+                                    data-mines="99"
+                                    data-classic="true">
+
+                                    <strong>CLASSIC</strong>
+
+                                    <span>
+                                        30 × 16 · 99 MINES
+                                    </span>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="menu-note">
+
+                            LEFT CLICK · OPEN<br>
+                            RIGHT CLICK · FLAG
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+
+        <!-- =================================================
+             SIDE PANEL
+             ================================================= -->
+
+        <aside class="side">
+
+
+            <!-- STATUS -->
+
+            <section class="side-card">
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            MINES
+                        </div>
+
+                        <div
+                            class="stat-value mine-count"
+                            id="mineCount">
+                            000
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            TIME
+                        </div>
+
+                        <div
+                            class="stat-value timer"
+                            id="timer">
+                            000
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div style="height:8px"></div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        MODE
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="modeValue"
+                        style="font-size:15px">
+                        —
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CONTROLS -->
+
+            <section class="side-card">
+
+                <div class="controls-title">
+                    CONTROLS
+                </div>
+
+
+                <div class="control-row">
+
+                    <span>
+                        Open
+                    </span>
+
+                    <span class="key">
+                        LMB
+                    </span>
+
+                </div>
+
+
+                <div class="control-row">
+
+                    <span>
+                        Flag
+                    </span>
+
+                    <span class="key">
+                        RMB
+                    </span>
+
+                </div>
+
+
+                <div class="control-row">
+
+                    <span>
+                        Restart
+                    </span>
+
+                    <span class="key">
+                        SPACE
+                    </span>
+
+                </div>
+
+
+                <div class="control-row">
+
+                    <span>
+                        Menu
+                    </span>
+
+                    <span class="key">
+                        ESC
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- ACTIONS -->
+
+            <section class="side-card">
+
+                <div class="controls-title">
+                    GAME
+                </div>
+
+
+                <div class="action-buttons">
+
+                    <button
+                        class="btn btn-primary"
+                        id="restartBtn">
+                        RESTART
+                    </button>
+
+
+                    <button
+                        class="btn"
+                        id="menuBtn">
+                        MENU
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- RULES -->
+
+            <section class="side-card">
+
+                <div class="controls-title">
+                    GAME RULES
+                </div>
+
+                <div class="help">
+
+                    左键点击格子将其翻开。<br>
+
+                    右键点击可以插旗。<br>
+
+                    翻开数字表示周围八格中的雷数。<br>
+
+                    空白区域会自动展开。<br>
+
+                    <br>
+
+                    <b>不要踩雷。</b>
+
+                </div>
+
+            </section>
+
+
+        </aside>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   MINESWEEPER WEB EDITION
+   ============================================================ */
+
+"use strict";
+
+
+/* ============================================================
+   DOM
+============================================================ */
+
+const board =
+    document.getElementById("board");
+
+const boardWrap =
+    document.querySelector(".board-wrap");
+
+const overlay =
+    document.getElementById("overlay");
+
+const quickStartBtn =
+    document.getElementById("quickStartBtn");
+
+const modeButtons =
+    document.querySelectorAll(".mode-btn");
+
+const restartBtn =
+    document.getElementById("restartBtn");
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const mineCount =
+    document.getElementById("mineCount");
+
+const timer =
+    document.getElementById("timer");
+
+const modeValue =
+    document.getElementById("modeValue");
+
+const gameMessage =
+    document.getElementById("gameMessage");
+
+
+/* ============================================================
+   EXPLOSION SOUND
+============================================================ */
+
+/*
+   地雷爆炸音效
+   使用本地文件 lose_minesweeper.wav
+
+   lose_minesweeper.wav 与 index.html
+   位于同一个文件夹。
+*/
+
+const explosionSound =
+    new Audio(
+        "lose_minesweeper.wav"
+    );
+
+explosionSound.preload = "auto";
+
+explosionSound.volume = 0.75;
+
+
+/* ============================================================
+   GAME CONFIG
+============================================================ */
+
+let rows = 15;
+let cols = 15;
+let numMines = 30;
+
+let classicMode = false;
+
+
+/* ============================================================
+   GAME DATA
+============================================================ */
+
+let mineMap = [];
+let opened = [];
+let flagged = [];
+let numbers = [];
+
+let cells = [];
+
+
+/* ============================================================
+   GAME STATE
+============================================================ */
+
+let state = "menu";
+
+let elapsedTime = 0;
+
+let timerInterval = null;
+
+let firstClick = true;
+
+
+/* ============================================================
+   DEFAULT MODE
+============================================================ */
+
+const DEFAULT_MODE = {
+    rows:15,
+    cols:15,
+    mines:30,
+    classic:false
+};
+
+
+/* ============================================================
+   START MODE
+============================================================ */
+
+function startMode(
+    selectedRows,
+    selectedCols,
+    selectedMines,
+    isClassic
+){
+
+    rows = selectedRows;
+    cols = selectedCols;
+    numMines = selectedMines;
+    classicMode = isClassic;
+
+    state = "playing";
+
+    firstClick = true;
+
+    elapsedTime = 0;
+
+    clearTimer();
+
+    timer.textContent = "000";
+
+    modeValue.textContent =
+        classicMode
+        ? "CLASSIC · 30 × 16"
+        : `${rows} × ${cols}`;
+
+    createGame();
+
+    overlay.classList.add("hidden");
+
+    hideMessage();
+
+}
+
+
+/* ============================================================
+   CREATE GAME
+============================================================ */
+
+function createGame(){
+
+    generateMineMap();
+
+    calculateNumbers();
+
+    createBoard();
+
+    updateMineCounter();
+
+    requestAnimationFrame(()=>{
+        resizeBoard();
+    });
+
+}
+
+
+/* ============================================================
+   GENERATE MINE MAP
+============================================================ */
+
+function generateMineMap(){
+
+    mineMap =
+        Array.from(
+            {length:rows},
+            ()=>Array(cols).fill(false)
+        );
+
+    opened =
+        Array.from(
+            {length:rows},
+            ()=>Array(cols).fill(false)
+        );
+
+    flagged =
+        Array.from(
+            {length:rows},
+            ()=>Array(cols).fill(false)
+        );
+
+
+    const total =
+        rows * cols;
+
+
+    const indices =
+        Array.from(
+            {length:total},
+            (_,i)=>i
+        );
+
+
+    for(
+        let i=indices.length-1;
+        i>0;
+        i--
+    ){
+
+        const j =
+            Math.floor(
+                Math.random()*(i+1)
+            );
+
+        [
+            indices[i],
+            indices[j]
+        ] =
+        [
+            indices[j],
+            indices[i]
+        ];
+
+    }
+
+
+    for(
+        let i=0;
+        i<numMines;
+        i++
+    ){
+
+        const index =
+            indices[i];
+
+        const r =
+            Math.floor(index/cols);
+
+        const c =
+            index%cols;
+
+        mineMap[r][c] = true;
+
+    }
+
+}
+
+
+/* ============================================================
+   CALCULATE NUMBERS
+============================================================ */
+
+function calculateNumbers(){
+
+    numbers =
+        Array.from(
+            {length:rows},
+            ()=>Array(cols).fill(0)
+        );
+
+
+    for(let r=0;r<rows;r++){
+
+        for(let c=0;c<cols;c++){
+
+            if(mineMap[r][c]){
+
+                numbers[r][c] = -1;
+
+                continue;
+
+            }
+
+
+            let count = 0;
+
+
+            for(let dr=-1;dr<=1;dr++){
+
+                for(let dc=-1;dc<=1;dc++){
+
+                    if(
+                        dr === 0 &&
+                        dc === 0
+                    ){
+                        continue;
+                    }
+
+
+                    const nr =
+                        r + dr;
+
+                    const nc =
+                        c + dc;
+
+
+                    if(
+                        nr >= 0 &&
+                        nr < rows &&
+                        nc >= 0 &&
+                        nc < cols
+                    ){
+
+                        if(
+                            mineMap[nr][nc]
+                        ){
+
+                            count++;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+            numbers[r][c] = count;
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   CREATE BOARD
+============================================================ */
+
+function createBoard(){
+
+    board.innerHTML = "";
+
+    cells = [];
+
+
+    board.style.gridTemplateColumns =
+        `repeat(${cols}, var(--cell-size))`;
+
+    board.style.gridTemplateRows =
+        `repeat(${rows}, var(--cell-size))`;
+
+
+    for(let r=0;r<rows;r++){
+
+        cells[r] = [];
+
+
+        for(let c=0;c<cols;c++){
+
+            const cell =
+                document.createElement("button");
+
+            cell.className = "cell";
+
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+
+
+            cell.addEventListener(
+                "click",
+                ()=>{
+                    leftClick(r,c);
+                }
+            );
+
+
+            cell.addEventListener(
+                "contextmenu",
+                e=>{
+                    e.preventDefault();
+
+                    rightClick(r,c);
+                }
+            );
+
+
+            board.appendChild(cell);
+
+            cells[r][c] = cell;
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   RESIZE BOARD
+============================================================ */
+
+function resizeBoard(){
+
+    if(state === "menu"){
+        return;
+    }
+
+
+    const rect =
+        boardWrap.getBoundingClientRect();
+
+
+    const padding =
+        window.innerWidth <= 800
+        ? 8
+        : 18;
+
+
+    let availableWidth =
+        rect.width - padding;
+
+    let availableHeight =
+        rect.height - padding;
+
+
+    if(classicMode){
+
+        let cellSize =
+            Math.floor(
+                Math.min(
+                    availableWidth / cols,
+                    availableHeight / rows
+                )
+            );
+
+
+        if(
+            !Number.isFinite(cellSize) ||
+            cellSize <= 0
+        ){
+
+            cellSize =
+                Math.floor(
+                    Math.min(
+                        (window.innerWidth * .7) / cols,
+                        (window.innerHeight * .7) / rows
+                    )
+                );
+
+        }
+
+
+        cellSize =
+            Math.max(
+                18,
+                cellSize
+            );
+
+
+        board.style.setProperty(
+            "--cell-size",
+            `${cellSize}px`
+        );
+
+
+        const boardWidth =
+            cols * cellSize +
+            (cols - 1) +
+            4;
+
+        const boardHeight =
+            rows * cellSize +
+            (rows - 1) +
+            4;
+
+
+        if(window.innerWidth <= 800){
+
+            boardWrap.style.minHeight =
+                `${Math.min(
+                    boardHeight + 16,
+                    window.innerHeight * .72
+                )}px`;
+
+        }
+
+
+        return;
+
+    }
+
+
+    let cellSize;
+
+
+    cellSize =
+        Math.floor(
+            Math.min(
+                (
+                    rect.width -
+                    20
+                ) / cols,
+
+                (
+                    window.innerHeight -
+                    180
+                ) / rows
+            )
+        );
+
+
+    if(window.innerWidth <= 800){
+
+        cellSize =
+            Math.floor(
+                Math.min(
+                    (
+                        rect.width -
+                        8
+                    ) / cols,
+
+                    48
+                )
+            );
+
+    }
+
+
+    cellSize =
+        Math.max(
+            18,
+            Math.min(
+                cellSize,
+                58
+            )
+        );
+
+
+    board.style.setProperty(
+        "--cell-size",
+        `${cellSize}px`
+    );
+
+
+    const boardWidth =
+        cols*cellSize + cols+3;
+
+    const boardHeight =
+        rows*cellSize + rows+3;
+
+
+    if(
+        window.innerWidth <= 800
+    ){
+
+        boardWrap.style.minHeight =
+            `${Math.min(
+                boardHeight+16,
+                window.innerHeight*.72
+            )}px`;
+
+    }
+
+}
+
+
+/* ============================================================
+   LEFT CLICK
+============================================================ */
+
+function leftClick(r,c){
+
+    if(state !== "playing"){
+        return;
+    }
+
+    if(
+        opened[r][c] ||
+        flagged[r][c]
+    ){
+        return;
+    }
+
+
+    if(firstClick){
+
+        firstClick = false;
+
+        if(mineMap[r][c]){
+
+            moveMine(r,c);
+
+            calculateNumbers();
+
+        }
+
+        startTimer();
+
+    }
+
+
+    if(mineMap[r][c]){
+
+        explode(r,c);
+
+        return;
+
+    }
+
+
+    openCell(r,c);
+
+
+    if(checkWin()){
+
+        winGame();
+
+    }
+
+}
+
+
+/* ============================================================
+   MOVE FIRST MINE
+============================================================ */
+
+function moveMine(r,c){
+
+    mineMap[r][c] = false;
+
+
+    const candidates = [];
+
+
+    for(let rr=0;rr<rows;rr++){
+
+        for(let cc=0;cc<cols;cc++){
+
+            if(
+                !mineMap[rr][cc] &&
+                !(
+                    rr===r &&
+                    cc===c
+                )
+            ){
+
+                candidates.push(
+                    [rr,cc]
+                );
+
+            }
+
+        }
+
+    }
+
+
+    const random =
+        candidates[
+            Math.floor(
+                Math.random()*
+                candidates.length
+            )
+        ];
+
+
+    mineMap[
+        random[0]
+    ][
+        random[1]
+    ] = true;
+
+}
+
+
+/* ============================================================
+   RIGHT CLICK
+============================================================ */
+
+function rightClick(r,c){
+
+    if(state !== "playing"){
+        return;
+    }
+
+
+    if(opened[r][c]){
+        return;
+    }
+
+
+    flagged[r][c] =
+        !flagged[r][c];
+
+
+    updateCell(r,c);
+
+    updateMineCounter();
+
+}
+
+
+/* ============================================================
+   OPEN CELL
+============================================================ */
+
+function openCell(r,c){
+
+    if(
+        r<0 ||
+        r>=rows ||
+        c<0 ||
+        c>=cols
+    ){
+        return;
+    }
+
+
+    if(opened[r][c]){
+        return;
+    }
+
+
+    if(flagged[r][c]){
+        return;
+    }
+
+
+    if(mineMap[r][c]){
+        return;
+    }
+
+
+    opened[r][c] = true;
+
+    updateCell(r,c);
+
+
+    const n =
+        numbers[r][c];
+
+
+    if(n === 0){
+
+        for(let dr=-1;dr<=1;dr++){
+
+            for(let dc=-1;dc<=1;dc++){
+
+                if(
+                    dr===0 &&
+                    dc===0
+                ){
+                    continue;
+                }
+
+
+                openCell(
+                    r+dr,
+                    c+dc
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   UPDATE CELL
+============================================================ */
+
+function updateCell(r,c){
+
+    const cell =
+        cells[r][c];
+
+
+    cell.className = "cell";
+
+
+    if(flagged[r][c]){
+
+        cell.classList.add("flag");
+
+        cell.textContent = "⚑";
+
+        return;
+
+    }
+
+
+    if(!opened[r][c]){
+
+        cell.textContent = "";
+
+        return;
+
+    }
+
+
+    cell.classList.add("open");
+
+
+    const n =
+        numbers[r][c];
+
+
+    if(n > 0){
+
+        cell.textContent =
+            String(n);
+
+        cell.classList.add(
+            `n${n}`
+        );
+
+    }else{
+
+        cell.textContent = "";
+
+    }
+
+}
+
+
+/* ============================================================
+   EXPLODE
+============================================================ */
+
+function explode(r,c){
+
+    state = "gameover";
+
+    clearTimer();
+
+
+    /* ================================================
+       播放本地踩雷爆炸音效
+    ================================================ */
+
+    try{
+
+        explosionSound.currentTime = 0;
+
+        explosionSound.play().catch(()=>{});
+
+    }catch(e){
+
+        console.warn(
+            "Explosion sound could not be played.",
+            e
+        );
+
+    }
+
+
+    /* 显示所有雷 */
+
+    for(let rr=0;rr<rows;rr++){
+
+        for(let cc=0;cc<cols;cc++){
+
+            if(mineMap[rr][cc]){
+
+                cells[rr][cc]
+                    .classList.add("mine");
+
+                cells[rr][cc].textContent =
+                    "✹";
+
+            }
+
+        }
+
+    }
+
+
+    cells[r][c]
+        .classList.add("exploded");
+
+    cells[r][c].textContent =
+        "✹";
+
+
+    showMessage(
+        "GAME OVER",
+        "lose"
+    );
+
+}
+
+
+/* ============================================================
+   CHECK WIN
+============================================================ */
+
+function checkWin(){
+
+    let openedSafe = 0;
+
+
+    for(let r=0;r<rows;r++){
+
+        for(let c=0;c<cols;c++){
+
+            if(
+                opened[r][c] &&
+                !mineMap[r][c]
+            ){
+
+                openedSafe++;
+
+            }
+
+        }
+
+    }
+
+
+    return (
+        openedSafe ===
+        rows*cols-numMines
+    );
+
+}
+
+
+/* ============================================================
+   WIN
+============================================================ */
+
+function winGame(){
+
+    state = "won";
+
+    clearTimer();
+
+
+    for(let r=0;r<rows;r++){
+
+        for(let c=0;c<cols;c++){
+
+            if(mineMap[r][c]){
+
+                flagged[r][c] = true;
+
+                cells[r][c]
+                    .classList.add("flag");
+
+                cells[r][c].textContent =
+                    "⚑";
+
+            }
+
+        }
+
+    }
+
+
+    updateMineCounter();
+
+
+    showMessage(
+        "YOU WIN!",
+        "win"
+    );
+
+}
+
+
+/* ============================================================
+   MINE COUNTER
+============================================================ */
+
+function updateMineCounter(){
+
+    let flags = 0;
+
+
+    for(let r=0;r<rows;r++){
+
+        for(let c=0;c<cols;c++){
+
+            if(flagged[r][c]){
+                flags++;
+            }
+
+        }
+
+    }
+
+
+    const remaining =
+        Math.max(
+            0,
+            numMines-flags
+        );
+
+
+    mineCount.textContent =
+        String(remaining)
+            .padStart(3,"0");
+
+}
+
+
+/* ============================================================
+   TIMER
+============================================================ */
+
+function startTimer(){
+
+    clearTimer();
+
+
+    timerInterval =
+        setInterval(()=>{
+
+            if(state !== "playing"){
+                return;
+            }
+
+
+            elapsedTime++;
+
+
+            timer.textContent =
+                String(
+                    Math.min(
+                        elapsedTime,
+                        999
+                    )
+                ).padStart(3,"0");
+
+
+        },1000);
+
+}
+
+
+function clearTimer(){
+
+    if(timerInterval){
+
+        clearInterval(
+            timerInterval
+        );
+
+        timerInterval = null;
+
+    }
+
+}
+
+
+/* ============================================================
+   MESSAGE
+============================================================ */
+
+function showMessage(text,type){
+
+    gameMessage.textContent =
+        text;
+
+    gameMessage.className =
+        "game-message show " + type;
+
+}
+
+
+function hideMessage(){
+
+    gameMessage.className =
+        "game-message";
+
+    gameMessage.textContent =
+        "";
+
+}
+
+
+/* ============================================================
+   RESTART
+============================================================ */
+
+function restartGame(){
+
+    if(
+        state === "menu"
+    ){
+        return;
+    }
+
+
+    startMode(
+        rows,
+        cols,
+        numMines,
+        classicMode
+    );
+
+}
+
+
+/* ============================================================
+   MENU
+============================================================ */
+
+function showMenu(){
+
+    state = "menu";
+
+    clearTimer();
+
+    board.innerHTML = "";
+
+    cells = [];
+
+    hideMessage();
+
+    overlay.classList.remove(
+        "hidden"
+    );
+
+    modeValue.textContent =
+        "—";
+
+    mineCount.textContent =
+        "000";
+
+    timer.textContent =
+        "000";
+
+
+    boardWrap.style.minHeight =
+        "";
+
+
+    document.documentElement
+        .style.overflow = "";
+
+    document.body
+        .style.overflow = "";
+
+}
+
+
+/* ============================================================
+   QUICK START
+============================================================ */
+
+quickStartBtn.addEventListener(
+    "click",
+    ()=>{
+        startMode(
+            DEFAULT_MODE.rows,
+            DEFAULT_MODE.cols,
+            DEFAULT_MODE.mines,
+            DEFAULT_MODE.classic
+        );
+    }
+);
+
+
+/* ============================================================
+   MODE BUTTONS
+============================================================ */
+
+modeButtons.forEach(btn=>{
+
+    btn.addEventListener(
+        "click",
+        ()=>{
+
+            const r =
+                Number(
+                    btn.dataset.rows
+                );
+
+            const c =
+                Number(
+                    btn.dataset.cols
+                );
+
+            const mines =
+                Number(
+                    btn.dataset.mines
+                );
+
+            const classic =
+                btn.dataset.classic ===
+                "true";
+
+
+            startMode(
+                r,
+                c,
+                mines,
+                classic
+            );
+
+        }
+    );
+
+});
+
+
+/* ============================================================
+   RESTART BUTTON
+============================================================ */
+
+restartBtn.addEventListener(
+    "click",
+    restartGame
+);
+
+
+/* ============================================================
+   MENU BUTTON
+============================================================ */
+
+menuBtn.addEventListener(
+    "click",
+    showMenu
+);
+
+
+/* ============================================================
+   KEYBOARD
+============================================================ */
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        const key =
+            e.key.toLowerCase();
+
+
+        if(key === "escape"){
+
+            if(state !== "menu"){
+
+                e.preventDefault();
+
+                showMenu();
+
+            }
+
+            return;
+
+        }
+
+
+        if(key === " "){
+
+            if(state !== "menu"){
+
+                e.preventDefault();
+
+                restartGame();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   WINDOW RESIZE
+============================================================ */
+
+window.addEventListener(
+    "resize",
+    ()=>{
+        requestAnimationFrame(()=>{
+            resizeBoard();
+        });
+    }
+);
+
+
+/* ============================================================
+   FULLSCREEN SUPPORT
+============================================================ */
+
+function updateClassicFullscreen(){
+
+    if(!classicMode){
+        return;
+    }
+
+    resizeBoard();
+
+}
+
+
+/* ============================================================
+   DOUBLE CLICK PREVENTION
+============================================================ */
+
+board.addEventListener(
+    "dblclick",
+    e=>{
+        e.preventDefault();
+    }
+);
+
+
+/* ============================================================
+   MOBILE LONG PRESS
+============================================================ */
+
+let longPressTimer = null;
+
+board.addEventListener(
+    "pointerdown",
+    e=>{
+
+        const cell =
+            e.target.closest(".cell");
+
+        if(!cell){
+            return;
+        }
+
+
+        if(e.pointerType === "touch"){
+
+            const r =
+                Number(cell.dataset.row);
+
+            const c =
+                Number(cell.dataset.col);
+
+
+            longPressTimer =
+                setTimeout(()=>{
+
+                    rightClick(r,c);
+
+                },500);
+
+        }
+
+    }
+);
+
+
+board.addEventListener(
+    "pointerup",
+    ()=>{
+        clearTimeout(
+            longPressTimer
+        );
+    }
+);
+
+
+board.addEventListener(
+    "pointercancel",
+    ()=>{
+        clearTimeout(
+            longPressTimer
+        );
+    }
+);
+
+
+/* ============================================================
+   INITIAL STATE
+============================================================ */
+
+state = "menu";
+
+mineCount.textContent =
+    "000";
+
+timer.textContent =
+    "000";
+
+modeValue.textContent =
+    "—";
+
+</script>
+
+</body>
+</html>

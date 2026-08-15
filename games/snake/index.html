@@ -1,0 +1,2470 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<title>SNAKE</title>
+
+<style>
+
+/* =========================================================
+                         基础变量
+   ========================================================= */
+
+:root{
+    /*
+     * 游戏库整体深蓝色基调
+     */
+
+    --bg:#07111f;
+
+    --panel:#0d1a2b;
+
+    --panel2:#122238;
+
+    --line:#1c3048;
+
+    --line-light:#29435f;
+
+    --text:#eef5ff;
+
+    --muted:#8295ad;
+
+    --muted-light:#a8b8ca;
+
+
+    /*
+     * 贪吃蛇
+     */
+
+    --green:#55d66f;
+
+    --green-dark:#329b4d;
+
+    --green-light:#79ed8b;
+
+
+    /*
+     * 食物
+     */
+
+    --red:#f05252;
+
+    --red-dark:#b93636;
+
+
+    /*
+     * 棋盘
+     */
+
+    --board:#091827;
+
+    --grid:#14283d;
+}
+
+
+/* =========================================================
+                         页面
+   ========================================================= */
+
+*{
+    box-sizing:border-box;
+}
+
+
+html,
+body{
+    margin:0;
+    padding:0;
+
+    width:100%;
+    min-height:100%;
+
+    background:var(--bg);
+
+    color:var(--text);
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+}
+
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(
+            circle at 50% -15%,
+            #18345f 0%,
+            #0a1932 28%,
+            #050d1c 65%,
+            #020611 100%
+        );
+    display:flex;
+    flex-direction:column;
+    overflow-x:hidden;
+}
+
+
+/* =========================================================
+                         顶部导航
+   ========================================================= */
+
+.header{
+
+    position:relative;
+
+    width:100%;
+    height:78px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-bottom:
+        1px solid var(--line);
+
+    background:
+        rgba(7,17,31,0.97);
+}
+
+
+/* ---------------------------------------------------------
+                     Game Library
+   --------------------------------------------------------- */
+
+.header-back{
+
+    position:absolute;
+
+    left:28px;
+
+    top:50%;
+
+    transform:
+        translateY(-50%);
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    font-weight:500;
+
+    text-decoration:none;
+
+    letter-spacing:0.3px;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.header-back:hover{
+
+    color:var(--text);
+
+    transform:
+        translateY(-50%)
+        translateX(2px);
+
+}
+
+
+/* ---------------------------------------------------------
+                         标题
+   --------------------------------------------------------- */
+
+.header-title{
+
+    margin:0;
+
+    color:var(--text);
+
+    font-size:20px;
+
+    font-weight:700;
+
+    letter-spacing:3px;
+
+    line-height:1;
+}
+
+
+/* ---------------------------------------------------------
+                         CHENZI
+   --------------------------------------------------------- */
+
+.header-brand{
+
+    position:absolute;
+
+    right:28px;
+
+    top:50%;
+
+    transform:
+        translateY(-50%);
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    font-weight:500;
+
+    letter-spacing:1px;
+}
+
+
+/* =========================================================
+                         主区域
+   ========================================================= */
+
+.main{
+
+    flex:1;
+
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    padding:
+        34px
+        20px
+        45px;
+}
+
+
+/* =========================================================
+                       游戏容器
+   ========================================================= */
+
+.game-card{
+
+    width:min(620px,94vw);
+
+    padding:24px;
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid var(--line);
+
+    border-radius:18px;
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,0.28);
+
+}
+
+
+/* =========================================================
+                       游戏信息栏
+   ========================================================= */
+
+.game-info{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:16px;
+
+    padding:
+        0
+        3px;
+}
+
+
+/* ---------------------------------------------------------
+                         分数
+   --------------------------------------------------------- */
+
+.score-box{
+
+    display:flex;
+
+    align-items:baseline;
+
+    gap:8px;
+}
+
+
+.score-label{
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+}
+
+
+.score{
+
+    color:var(--text);
+
+    font-size:20px;
+
+    font-weight:700;
+
+    font-variant-numeric:tabular-nums;
+}
+
+
+/* ---------------------------------------------------------
+                         速度
+   --------------------------------------------------------- */
+
+.speed{
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    letter-spacing:0.5px;
+}
+
+
+/* =========================================================
+                         棋盘
+   ========================================================= */
+
+.board-wrap{
+
+    position:relative;
+
+    width:100%;
+
+    aspect-ratio:1 / 1;
+
+    background:var(--board);
+
+    border:
+        1px solid var(--line-light);
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+}
+
+
+#gameCanvas{
+
+    display:block;
+
+    width:100%;
+
+    height:100%;
+
+    background:var(--board);
+
+    touch-action:none;
+}
+
+
+/* =========================================================
+                       开始 / 结束遮罩
+   ========================================================= */
+
+.overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:
+        rgba(7,17,31,0.76);
+
+    backdrop-filter:blur(3px);
+
+    -webkit-backdrop-filter:blur(3px);
+
+    transition:
+        opacity 0.2s ease;
+}
+
+
+.overlay.hidden{
+
+    opacity:0;
+
+    pointer-events:none;
+}
+
+
+.overlay-title{
+
+    margin:
+        0 0 12px;
+
+    font-size:34px;
+
+    font-weight:800;
+
+    letter-spacing:4px;
+
+    color:var(--text);
+}
+
+
+.overlay-text{
+
+    margin:0;
+
+    color:var(--muted-light);
+
+    font-size:14px;
+
+    letter-spacing:0.3px;
+
+    text-align:center;
+
+    line-height:1.8;
+}
+
+
+/* =========================================================
+                       底部操作提示
+   ========================================================= */
+
+.controls{
+
+    margin-top:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:18px;
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    flex-wrap:wrap;
+}
+
+
+.key{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-width:26px;
+
+    height:24px;
+
+    padding:
+        0 7px;
+
+    margin-right:4px;
+
+    border:
+        1px solid var(--line-light);
+
+    border-bottom-width:2px;
+
+    border-radius:5px;
+
+    background:
+        var(--panel2);
+
+    color:#b8c8da;
+
+    font-size:11px;
+
+    font-family:inherit;
+}
+
+
+/* =========================================================
+                         手机适配
+   ========================================================= */
+
+@media(max-width:600px){
+
+    .header{
+
+        height:64px;
+    }
+
+
+    .header-back{
+
+        left:16px;
+
+        font-size:11px;
+    }
+
+
+    .header-brand{
+
+        right:16px;
+
+        font-size:11px;
+    }
+
+
+    .header-title{
+
+        font-size:17px;
+
+        letter-spacing:2px;
+    }
+
+
+    .main{
+
+        padding:
+            22px
+            10px
+            30px;
+    }
+
+
+    .game-card{
+
+        width:96vw;
+
+        padding:14px;
+
+        border-radius:14px;
+    }
+
+
+    .overlay-title{
+
+        font-size:27px;
+
+        letter-spacing:3px;
+    }
+
+
+    .controls{
+
+        gap:9px;
+
+        font-size:10px;
+    }
+
+
+    .key{
+
+        height:22px;
+
+        min-width:23px;
+
+        padding:
+            0 5px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+                         顶部导航
+     ========================================================= -->
+
+<header class="header">
+
+
+    <!-- 左上角 -->
+
+    <a
+        class="header-back"
+        href="../../index.html"
+    >
+        ← Game Library
+    </a>
+
+
+    <!-- 中间 -->
+
+    <h1 class="header-title">
+        SNAKE
+    </h1>
+
+
+    <!-- 右上角 -->
+
+    <div class="header-brand">
+        CHENZI
+    </div>
+
+
+</header>
+
+
+<!-- =========================================================
+                         游戏主体
+     ========================================================= -->
+
+<main class="main">
+
+
+    <section class="game-card">
+
+
+        <!-- =================================================
+                         信息栏
+             ================================================= -->
+
+        <div class="game-info">
+
+
+            <div class="score-box">
+
+                <span class="score-label">
+                    Score
+                </span>
+
+                <span
+                    class="score"
+                    id="score"
+                >
+                    0
+                </span>
+
+            </div>
+
+
+            <div
+                class="speed"
+                id="speed"
+            >
+                SPEED 1
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+                         游戏棋盘
+             ================================================= -->
+
+        <div class="board-wrap">
+
+
+            <canvas
+                id="gameCanvas"
+                width="600"
+                height="600"
+            ></canvas>
+
+
+            <!-- =================================================
+                             游戏提示
+                 ================================================= -->
+
+            <div
+                class="overlay"
+                id="overlay"
+            >
+
+
+                <h2
+                    class="overlay-title"
+                    id="overlayTitle"
+                >
+                    SNAKE
+                </h2>
+
+
+                <p
+                    class="overlay-text"
+                    id="overlayText"
+                >
+                    按 SPACE 开始
+                </p>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+                         操作说明
+             ================================================= -->
+
+        <div class="controls">
+
+
+            <span>
+
+                <span class="key">↑</span>
+
+                <span class="key">↓</span>
+
+                <span class="key">←</span>
+
+                <span class="key">→</span>
+
+                移动
+
+            </span>
+
+
+            <span>
+
+                <span class="key">SPACE</span>
+
+                开始 / 重开
+
+            </span>
+
+
+            <span>
+
+                <span class="key">ESC</span>
+
+                返回
+
+            </span>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<!-- =========================================================
+                         背景音乐
+     ========================================================= -->
+
+<audio
+    id="bgm"
+    src="snakegame_bgm.mp3"
+    loop
+    preload="auto"
+></audio>
+
+
+<script>
+
+/* =========================================================
+                         DOM
+   ========================================================= */
+
+const canvas =
+    document.getElementById(
+        "gameCanvas"
+    );
+
+
+const ctx =
+    canvas.getContext(
+        "2d"
+    );
+
+
+const scoreElement =
+    document.getElementById(
+        "score"
+    );
+
+
+const speedElement =
+    document.getElementById(
+        "speed"
+    );
+
+
+const overlay =
+    document.getElementById(
+        "overlay"
+    );
+
+
+const overlayTitle =
+    document.getElementById(
+        "overlayTitle"
+    );
+
+
+const overlayText =
+    document.getElementById(
+        "overlayText"
+    );
+
+
+const bgm =
+    document.getElementById(
+        "bgm"
+    );
+
+
+/* =========================================================
+                         游戏参数
+   ========================================================= */
+
+const BOARD_SIZE = 20;
+
+
+/*
+ * 初始蛇长度
+ */
+
+const INITIAL_LENGTH = 4;
+
+
+/*
+ * 初始移动间隔
+ *
+ * 150ms
+ */
+
+const INITIAL_DELAY = 150;
+
+
+/*
+ * 最快移动间隔
+ *
+ * 80ms
+ */
+
+const MIN_DELAY = 80;
+
+
+/*
+ * 每吃一个豆子
+ * 加速 3ms
+ */
+
+const SPEED_UP = 3;
+
+
+/* =========================================================
+                         游戏状态
+   ========================================================= */
+
+let snake = [];
+
+let food = null;
+
+
+let direction = {
+
+    x:1,
+
+    y:0
+
+};
+
+
+let nextDirection = {
+
+    x:1,
+
+    y:0
+
+};
+
+
+let score = 0;
+
+let moveDelay =
+    INITIAL_DELAY;
+
+
+let started = false;
+
+let gameOver = false;
+
+
+let lastMove = 0;
+
+
+/*
+ * 防止同一个移动周期
+ * 连续改变方向。
+ */
+
+let directionChanged = false;
+
+
+/* =========================================================
+                         音频系统
+   ========================================================= */
+
+let audioContext = null;
+
+
+/* ---------------------------------------------------------
+                   创建 AudioContext
+   --------------------------------------------------------- */
+
+function initAudio(){
+
+    if(!audioContext){
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+
+    if(
+        audioContext.state ===
+        "suspended"
+    ){
+
+        audioContext.resume();
+
+    }
+
+}
+
+
+/* =========================================================
+                     吃豆 BO 音效
+   ========================================================= */
+
+/*
+ * 这里专门增强了音效。
+ *
+ * 相比上一版：
+ *
+ * 1. 音量明显提高
+ * 2. 增加第二个谐波
+ * 3. 高频部分更加明显
+ * 4. 衰减仍然很短
+ *
+ * 所以不会变成刺耳的长音，
+ * 但在 BGM 下会明显听到 BO。
+ */
+
+function playBo(){
+
+    initAudio();
+
+
+    const now =
+        audioContext.currentTime;
+
+
+    /*
+     * 主音
+     */
+
+    const oscillator =
+        audioContext.createOscillator();
+
+
+    /*
+     * 第二层高频音，
+     * 增加声音的存在感。
+     */
+
+    const oscillator2 =
+        audioContext.createOscillator();
+
+
+    /*
+     * 主音音量
+     */
+
+    const gain =
+        audioContext.createGain();
+
+
+    /*
+     * 高频音音量
+     */
+
+    const gain2 =
+        audioContext.createGain();
+
+
+    /*
+     * 总压缩器。
+     *
+     * 防止增强后的 BO 爆音。
+     */
+
+    const compressor =
+        audioContext.createDynamicsCompressor();
+
+
+    compressor.threshold.value = -18;
+
+    compressor.knee.value = 8;
+
+    compressor.ratio.value = 8;
+
+    compressor.attack.value = 0.003;
+
+    compressor.release.value = 0.08;
+
+
+    /* =====================================================
+                         主音
+       ===================================================== */
+
+    oscillator.type =
+        "square";
+
+
+    oscillator.frequency.setValueAtTime(
+        240,
+        now
+    );
+
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        105,
+        now + 0.13
+    );
+
+
+    /*
+     * 明显提高音量。
+     */
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.34,
+        now + 0.006
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.14
+    );
+
+
+    /* =====================================================
+                         高频层
+       ===================================================== */
+
+    oscillator2.type =
+        "triangle";
+
+
+    oscillator2.frequency.setValueAtTime(
+        480,
+        now
+    );
+
+
+    oscillator2.frequency.exponentialRampToValueAtTime(
+        210,
+        now + 0.11
+    );
+
+
+    gain2.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain2.gain.exponentialRampToValueAtTime(
+        0.13,
+        now + 0.005
+    );
+
+
+    gain2.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.11
+    );
+
+
+    /*
+     * 连接。
+     */
+
+    oscillator.connect(gain);
+
+    oscillator2.connect(gain2);
+
+    gain.connect(compressor);
+
+    gain2.connect(compressor);
+
+    compressor.connect(
+        audioContext.destination
+    );
+
+
+    /*
+     * 开始 / 停止。
+     */
+
+    oscillator.start(now);
+
+    oscillator2.start(now);
+
+
+    oscillator.stop(
+        now + 0.15
+    );
+
+    oscillator2.stop(
+        now + 0.12
+    );
+
+}
+
+
+/* =========================================================
+                     背景音乐
+   ========================================================= */
+
+function startMusic(){
+
+    /*
+     * BGM 音量适当降低，
+     * 给 BO 留出空间。
+     */
+
+    bgm.volume = 0.22;
+
+
+    const promise =
+        bgm.play();
+
+
+    if(
+        promise !== undefined
+    ){
+
+        promise.catch(
+            () => {}
+        );
+
+    }
+
+}
+
+
+function stopMusic(){
+
+    bgm.pause();
+
+    bgm.currentTime = 0;
+
+}
+
+
+/* =========================================================
+                       单格大小
+   ========================================================= */
+
+function cellSize(){
+
+    return (
+        canvas.width /
+        BOARD_SIZE
+    );
+
+}
+
+
+/* =========================================================
+                       绘制棋盘
+   ========================================================= */
+
+function drawBoard(){
+
+    const size =
+        cellSize();
+
+
+    /*
+     * 深蓝色棋盘底。
+     */
+
+    ctx.fillStyle =
+        "#091827";
+
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /*
+     * 棋盘网格。
+     */
+
+    ctx.strokeStyle =
+        "#14283d";
+
+
+    ctx.lineWidth = 1;
+
+
+    for(
+        let x = 1;
+        x < BOARD_SIZE;
+        x++
+    ){
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            x * size,
+            0
+        );
+
+
+        ctx.lineTo(
+            x * size,
+            canvas.height
+        );
+
+
+        ctx.stroke();
+
+    }
+
+
+    for(
+        let y = 1;
+        y < BOARD_SIZE;
+        y++
+    ){
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            0,
+            y * size
+        );
+
+
+        ctx.lineTo(
+            canvas.width,
+            y * size
+        );
+
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================================================
+                       绘制蛇
+   ========================================================= */
+
+function drawSnake(){
+
+    const size =
+        cellSize();
+
+
+    /*
+     * 从尾部向蛇头绘制。
+     */
+
+    for(
+        let i =
+            snake.length - 1;
+
+        i >= 0;
+
+        i--
+    ){
+
+        const segment =
+            snake[i];
+
+
+        /*
+         * 蛇头比身体稍大。
+         */
+
+        const padding =
+            i === 0
+                ? size * 0.10
+                : size * 0.14;
+
+
+        const x =
+            segment.x * size +
+            padding;
+
+
+        const y =
+            segment.y * size +
+            padding;
+
+
+        const width =
+            size -
+            padding * 2;
+
+
+        const radius =
+            Math.min(
+                5,
+                width * 0.18
+            );
+
+
+        /*
+         * 蛇头颜色。
+         */
+
+        if(i === 0){
+
+            ctx.fillStyle =
+                "#79ed8b";
+
+
+            ctx.strokeStyle =
+                "#3caf58";
+
+        }
+
+        else{
+
+            ctx.fillStyle =
+                "#55d66f";
+
+
+            ctx.strokeStyle =
+                "#329b4d";
+
+        }
+
+
+        roundRect(
+            ctx,
+            x,
+            y,
+            width,
+            width,
+            radius
+        );
+
+
+        ctx.fill();
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================================================
+                       圆角矩形
+   ========================================================= */
+
+function roundRect(
+    context,
+    x,
+    y,
+    width,
+    height,
+    radius
+){
+
+    context.beginPath();
+
+
+    context.moveTo(
+        x + radius,
+        y
+    );
+
+
+    context.lineTo(
+        x + width - radius,
+        y
+    );
+
+
+    context.quadraticCurveTo(
+        x + width,
+        y,
+        x + width,
+        y + radius
+    );
+
+
+    context.lineTo(
+        x + width,
+        y + height - radius
+    );
+
+
+    context.quadraticCurveTo(
+        x + width,
+        y + height,
+        x + width - radius,
+        y + height
+    );
+
+
+    context.lineTo(
+        x + radius,
+        y + height
+    );
+
+
+    context.quadraticCurveTo(
+        x,
+        y + height,
+        x,
+        y + height - radius
+    );
+
+
+    context.lineTo(
+        x,
+        y + radius
+    );
+
+
+    context.quadraticCurveTo(
+        x,
+        y,
+        x + radius,
+        y
+    );
+
+
+    context.closePath();
+
+}
+
+
+/* =========================================================
+                       绘制食物
+   ========================================================= */
+
+function drawFood(){
+
+    const size =
+        cellSize();
+
+
+    const centerX =
+        food.x * size +
+        size / 2;
+
+
+    const centerY =
+        food.y * size +
+        size / 2;
+
+
+    const radius =
+        size * 0.28;
+
+
+    /*
+     * 外层微弱光晕。
+     */
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        centerX,
+        centerY,
+        radius + 3,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        "rgba(240,82,82,0.12)";
+
+
+    ctx.fill();
+
+
+    /*
+     * 食物主体。
+     */
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        centerX,
+        centerY,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        "#f05252";
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#b93636";
+
+
+    ctx.lineWidth =
+        1.5;
+
+
+    ctx.stroke();
+
+
+    /*
+     * 高光。
+     */
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        centerX - radius * 0.32,
+        centerY - radius * 0.32,
+        radius * 0.22,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,255,255,0.45)";
+
+
+    ctx.fill();
+
+}
+
+
+/* =========================================================
+                       绘制全部
+   ========================================================= */
+
+function draw(){
+
+    drawBoard();
+
+    drawFood();
+
+    drawSnake();
+
+}
+
+
+/* =========================================================
+                     生成食物
+   ========================================================= */
+
+function createFood(){
+
+    while(true){
+
+        /*
+         * 食物保持和 MATLAB 版本
+         * 一样不会紧贴棋盘边缘。
+         */
+
+        const position = {
+
+            x:
+                Math.floor(
+                    Math.random() *
+                    (BOARD_SIZE - 4)
+                ) + 2,
+
+
+            y:
+                Math.floor(
+                    Math.random() *
+                    (BOARD_SIZE - 4)
+                ) + 2
+
+        };
+
+
+        /*
+         * 不得生成在蛇身上。
+         */
+
+        const occupied =
+            snake.some(
+                segment =>
+
+                    segment.x ===
+                    position.x &&
+
+                    segment.y ===
+                    position.y
+            );
+
+
+        if(!occupied){
+
+            return position;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+                       初始化
+   ========================================================= */
+
+function initializeGame(){
+
+    snake = [];
+
+
+    /*
+     * 初始蛇：
+     *
+     * 10 10
+     *  9 10
+     *  8 10
+     *  7 10
+     */
+
+    for(
+        let i = 0;
+        i < INITIAL_LENGTH;
+        i++
+    ){
+
+        snake.push({
+
+            x:10 - i,
+
+            y:10
+
+        });
+
+    }
+
+
+    direction = {
+
+        x:1,
+
+        y:0
+
+    };
+
+
+    nextDirection = {
+
+        x:1,
+
+        y:0
+
+    };
+
+
+    score = 0;
+
+
+    moveDelay =
+        INITIAL_DELAY;
+
+
+    started = false;
+
+
+    gameOver = false;
+
+
+    lastMove = 0;
+
+
+    directionChanged =
+        false;
+
+
+    scoreElement.textContent =
+        "0";
+
+
+    updateSpeedText();
+
+
+    food =
+        createFood();
+
+
+    /*
+     * 初始提示。
+     */
+
+    overlayTitle.textContent =
+        "SNAKE";
+
+
+    overlayText.innerHTML =
+        "按 SPACE 开始";
+
+
+    overlay.classList.remove(
+        "hidden"
+    );
+
+
+    draw();
+
+}
+
+
+/* =========================================================
+                     更新速度显示
+   ========================================================= */
+
+function updateSpeedText(){
+
+    const speedLevel =
+        Math.floor(
+            (
+                INITIAL_DELAY -
+                moveDelay
+            ) / 10
+        ) + 1;
+
+
+    speedElement.textContent =
+        `SPEED ${speedLevel}`;
+
+}
+
+
+/* =========================================================
+                       开始游戏
+   ========================================================= */
+
+function startGame(){
+
+    initAudio();
+
+
+    started = true;
+
+
+    gameOver = false;
+
+
+    /*
+     * 播放 BGM。
+     */
+
+    startMusic();
+
+
+    /*
+     * 隐藏提示。
+     */
+
+    overlay.classList.add(
+        "hidden"
+    );
+
+
+    lastMove =
+        performance.now();
+
+}
+
+
+/* =========================================================
+                       游戏结束
+   ========================================================= */
+
+function endGame(){
+
+    gameOver = true;
+
+
+    /*
+     * 停止音乐。
+     */
+
+    stopMusic();
+
+
+    overlayTitle.textContent =
+        "GAME OVER";
+
+
+    overlayText.innerHTML =
+        `Score: ${score}<br>
+         SPACE 重新开始`;
+
+
+    overlay.classList.remove(
+        "hidden"
+    );
+
+
+    draw();
+
+}
+
+
+/* =========================================================
+                       重新开始
+   ========================================================= */
+
+function restartGame(){
+
+    initializeGame();
+
+
+    started = true;
+
+
+    gameOver = false;
+
+
+    /*
+     * 重新播放音乐。
+     */
+
+    startMusic();
+
+
+    overlay.classList.add(
+        "hidden"
+    );
+
+
+    lastMove =
+        performance.now();
+
+}
+
+
+/* =========================================================
+                       吃豆
+   ========================================================= */
+
+function eatFood(){
+
+    score++;
+
+
+    /*
+     * 更新分数。
+     */
+
+    scoreElement.textContent =
+        score;
+
+
+    /*
+     * 逐渐加速。
+     */
+
+    moveDelay =
+        Math.max(
+            MIN_DELAY,
+            INITIAL_DELAY -
+            score * SPEED_UP
+        );
+
+
+    updateSpeedText();
+
+
+    /*
+     * BO。
+     */
+
+    playBo();
+
+
+    /*
+     * 新食物。
+     */
+
+    food =
+        createFood();
+
+}
+
+
+/* =========================================================
+                       更新蛇
+   ========================================================= */
+
+function update(){
+
+    /*
+     * 应用下一方向。
+     */
+
+    direction = {
+
+        x:
+            nextDirection.x,
+
+        y:
+            nextDirection.y
+
+    };
+
+
+    /*
+     * 计算新蛇头。
+     */
+
+    const newHead = {
+
+        x:
+            snake[0].x +
+            direction.x,
+
+        y:
+            snake[0].y +
+            direction.y
+
+    };
+
+
+    /* =====================================================
+                         撞墙
+       ===================================================== */
+
+    if(
+
+        newHead.x < 0 ||
+
+        newHead.x >= BOARD_SIZE ||
+
+        newHead.y < 0 ||
+
+        newHead.y >= BOARD_SIZE
+
+    ){
+
+        endGame();
+
+        return;
+
+    }
+
+
+    /*
+     * 是否吃到食物。
+     */
+
+    const willEat =
+
+        newHead.x === food.x &&
+
+        newHead.y === food.y;
+
+
+    /* =====================================================
+                         撞自己
+       ===================================================== */
+
+    /*
+     * 不吃食物：
+     *
+     * 尾巴这一帧会离开，
+     * 所以最后一格不检查。
+     */
+
+    const bodyToCheck =
+
+        willEat
+
+            ? snake
+
+            : snake.slice(
+                0,
+                snake.length - 1
+            );
+
+
+    const hitSelf =
+
+        bodyToCheck.some(
+            segment =>
+
+                segment.x ===
+                newHead.x &&
+
+                segment.y ===
+                newHead.y
+        );
+
+
+    if(hitSelf){
+
+        endGame();
+
+        return;
+
+    }
+
+
+    /* =====================================================
+                         蛇向前
+       ===================================================== */
+
+    snake.unshift(
+        newHead
+    );
+
+
+    /*
+     * 吃到豆子：
+     *
+     * 不删除尾巴。
+     */
+
+    if(willEat){
+
+        eatFood();
+
+    }
+
+    else{
+
+        /*
+         * 没吃到：
+         *
+         * 删除尾巴。
+         */
+
+        snake.pop();
+
+    }
+
+
+    directionChanged =
+        false;
+
+
+    draw();
+
+}
+
+
+/* =========================================================
+                       主循环
+   ========================================================= */
+
+function gameLoop(
+    timestamp
+){
+
+    if(
+
+        started &&
+
+        !gameOver
+
+    ){
+
+        if(
+
+            timestamp -
+            lastMove >=
+            moveDelay
+
+        ){
+
+            lastMove =
+                timestamp;
+
+
+            update();
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================================
+                       键盘
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        const key =
+            event.key.toLowerCase();
+
+
+        /* =================================================
+                           SPACE
+           ================================================= */
+
+        if(
+
+            key === " " ||
+
+            key === "spacebar"
+
+        ){
+
+            event.preventDefault();
+
+
+            initAudio();
+
+
+            /*
+             * 尚未开始。
+             */
+
+            if(!started){
+
+                startGame();
+
+                return;
+
+            }
+
+
+            /*
+             * 游戏结束。
+             */
+
+            if(gameOver){
+
+                restartGame();
+
+                return;
+
+            }
+
+
+            return;
+
+        }
+
+
+        /* =================================================
+                           ESC
+           ================================================= */
+
+        if(key === "escape"){
+
+            event.preventDefault();
+
+
+            window.history.back();
+
+
+            return;
+
+        }
+
+
+        /*
+         * 游戏未开始或结束，
+         * 不处理方向。
+         */
+
+        if(
+
+            !started ||
+
+            gameOver
+
+        ){
+
+            return;
+
+        }
+
+
+        /*
+         * 当前移动周期已经改变过方向，
+         * 就不再接受第二次改变。
+         */
+
+        if(directionChanged){
+
+            return;
+
+        }
+
+
+        /* =================================================
+                           上
+           ================================================= */
+
+        if(
+
+            key === "arrowup" ||
+
+            key === "w"
+
+        ){
+
+            /*
+             * 正在向下，
+             * 不能直接向上。
+             */
+
+            if(direction.y !== 1){
+
+                nextDirection = {
+
+                    x:0,
+
+                    y:-1
+
+                };
+
+
+                directionChanged =
+                    true;
+
+            }
+
+        }
+
+
+        /* =================================================
+                           下
+           ================================================= */
+
+        else if(
+
+            key === "arrowdown" ||
+
+            key === "s"
+
+        ){
+
+            if(direction.y !== -1){
+
+                nextDirection = {
+
+                    x:0,
+
+                    y:1
+
+                };
+
+
+                directionChanged =
+                    true;
+
+            }
+
+        }
+
+
+        /* =================================================
+                           左
+           ================================================= */
+
+        else if(
+
+            key === "arrowleft" ||
+
+            key === "a"
+
+        ){
+
+            if(direction.x !== 1){
+
+                nextDirection = {
+
+                    x:-1,
+
+                    y:0
+
+                };
+
+
+                directionChanged =
+                    true;
+
+            }
+
+        }
+
+
+        /* =================================================
+                           右
+           ================================================= */
+
+        else if(
+
+            key === "arrowright" ||
+
+            key === "d"
+
+        ){
+
+            if(direction.x !== -1){
+
+                nextDirection = {
+
+                    x:1,
+
+                    y:0
+
+                };
+
+
+                directionChanged =
+                    true;
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+                    页面切换
+   ========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    function(){
+
+        /*
+         * 切到其他标签页：
+         * 暂停 BGM。
+         */
+
+        if(
+
+            document.hidden &&
+
+            started &&
+
+            !gameOver
+
+        ){
+
+            bgm.pause();
+
+        }
+
+
+        /*
+         * 回来：
+         * 继续音乐。
+         */
+
+        else if(
+
+            !document.hidden &&
+
+            started &&
+
+            !gameOver
+
+        ){
+
+            startMusic();
+
+
+            lastMove =
+                performance.now();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+                       启动
+   ========================================================= */
+
+initializeGame();
+
+
+requestAnimationFrame(
+    gameLoop
+);
+
+</script>
+
+</body>
+</html>
+

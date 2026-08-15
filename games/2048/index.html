@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>2048 — Chenzi Game Library</title>
+
+<style>
+
+:root{
+    --bg:#080d18;
+    --panel:#0f1728;
+    --panel2:#141e31;
+    --line:#26334a;
+
+    --text:#e8edf5;
+    --muted:#8d9ab0;
+
+    --accent:#6ba8ff;
+    --accent2:#8cc8ff;
+
+    --board:#111a2b;
+    --empty:#182337;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+}
+
+body{
+
+    min-height:100vh;
+
+    background:
+    radial-gradient(
+        circle at 50% -15%,
+        #18345f 0%,
+        #0a1932 28%,
+        #050d1c 65%,
+        #020611 100%
+    );
+
+
+    color:var(--text);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        "Microsoft YaHei",
+        sans-serif;
+
+    display:flex;
+    justify-content:center;
+
+    overflow-x:hidden;
+}
+
+
+/* =========================================================
+                         页面
+========================================================= */
+
+.page{
+
+    width:min(560px,94vw);
+
+    padding:
+        28px
+        0
+        40px;
+
+}
+
+
+/* =========================================================
+                         顶部
+========================================================= */
+
+.topbar{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:24px;
+
+}
+
+.back{
+
+    color:var(--muted);
+
+    text-decoration:none;
+
+    font-size:13px;
+
+    transition:.15s;
+
+}
+
+.back:hover{
+
+    color:var(--text);
+
+}
+
+
+.brand{
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    letter-spacing:2px;
+
+}
+
+
+/* =========================================================
+                         标题
+========================================================= */
+
+.header{
+
+    text-align:center;
+
+    margin-bottom:20px;
+
+}
+
+h1{
+
+    margin:0;
+
+    font-size:42px;
+
+    line-height:1;
+
+    letter-spacing:2px;
+
+    font-weight:700;
+
+}
+
+.subtitle{
+
+    margin-top:8px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    letter-spacing:3px;
+
+}
+
+
+/* =========================================================
+                         信息栏
+========================================================= */
+
+.info{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:14px;
+
+}
+
+
+.score-box{
+
+    min-width:110px;
+
+    padding:
+        8px
+        14px;
+
+    background:
+        rgba(15,23,40,.9);
+
+    border:
+        1px solid var(--line);
+
+    border-radius:9px;
+
+    text-align:center;
+
+}
+
+
+.score-label{
+
+    display:block;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    letter-spacing:1.5px;
+
+}
+
+
+#score{
+
+    display:block;
+
+    margin-top:2px;
+
+    font-size:20px;
+
+    font-weight:700;
+
+    color:var(--accent2);
+
+}
+
+
+.new-game{
+
+    border:
+        1px solid #38547c;
+
+    background:
+        #14243d;
+
+    color:#cfe4ff;
+
+    padding:
+        10px
+        15px;
+
+    border-radius:8px;
+
+    font:inherit;
+
+    font-size:12px;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+}
+
+.new-game:hover{
+
+    background:#1a2f4f;
+
+    border-color:#5278aa;
+
+}
+
+
+/* =========================================================
+                         游戏区域
+========================================================= */
+
+.game-wrapper{
+
+    position:relative;
+
+    width:100%;
+
+    aspect-ratio:1 / 1;
+
+    background:
+        rgba(15,23,40,.94);
+
+    border:
+        1px solid var(--line);
+
+    border-radius:16px;
+
+    padding:14px;
+
+    box-shadow:
+        0 18px 60px rgba(0,0,0,.3);
+
+}
+
+
+canvas{
+
+    display:block;
+
+    width:100%;
+
+    height:100%;
+
+    border-radius:10px;
+
+    touch-action:none;
+
+}
+
+
+/* =========================================================
+                         游戏结束 / 胜利
+========================================================= */
+
+.overlay{
+
+    position:absolute;
+
+    inset:14px;
+
+    border-radius:10px;
+
+    background:
+        rgba(7,12,22,.84);
+
+    backdrop-filter:
+        blur(5px);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-direction:column;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.25s;
+
+}
+
+
+.overlay.show{
+
+    opacity:1;
+
+    pointer-events:auto;
+
+}
+
+
+.overlay-title{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+    margin-bottom:8px;
+
+}
+
+
+.overlay-sub{
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    margin-bottom:20px;
+
+}
+
+
+.overlay button{
+
+    border:
+        1px solid #38547c;
+
+    background:#14243d;
+
+    color:#d8e9ff;
+
+    padding:
+        10px
+        20px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font:inherit;
+
+}
+
+
+/* =========================================================
+                         手机方向键
+========================================================= */
+
+.controls{
+
+    margin-top:16px;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:7px;
+
+    max-width:230px;
+
+    margin-left:auto;
+
+    margin-right:auto;
+
+}
+
+
+.control{
+
+    height:44px;
+
+    border:
+        1px solid var(--line);
+
+    background:
+        var(--panel2);
+
+    color:var(--text);
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    user-select:none;
+
+    -webkit-user-select:none;
+
+    transition:.1s;
+
+}
+
+
+.control:hover{
+
+    background:#1c2940;
+
+    border-color:#41516b;
+
+}
+
+
+.control:active{
+
+    transform:scale(.94);
+
+    background:#243650;
+
+}
+
+
+.control.up{
+
+    grid-column:2;
+
+}
+
+.control.left{
+
+    grid-column:1;
+
+    grid-row:2;
+
+}
+
+.control.down{
+
+    grid-column:2;
+
+    grid-row:2;
+
+}
+
+.control.right{
+
+    grid-column:3;
+
+    grid-row:2;
+
+}
+
+
+/* =========================================================
+                         提示
+========================================================= */
+
+.hint{
+
+    text-align:center;
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    line-height:1.6;
+
+    margin-top:15px;
+
+}
+
+
+.hint b{
+
+    color:#b7c7df;
+
+    font-weight:500;
+
+}
+
+
+/* =========================================================
+                         小屏幕
+========================================================= */
+
+@media(max-width:500px){
+
+    .page{
+
+        padding-top:18px;
+
+    }
+
+    h1{
+
+        font-size:36px;
+
+    }
+
+    .score-box{
+
+        min-width:90px;
+
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+<!-- =====================================================
+                         顶部
+===================================================== -->
+
+<div class="topbar">
+
+    <a
+        href="../../index.html"
+        class="back">
+
+        ← Game Library
+
+    </a>
+
+
+    <div class="brand">
+
+        CHENZI
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+                         标题
+===================================================== -->
+
+<header class="header">
+
+    <h1>2048</h1>
+
+    <div class="subtitle">
+
+        PUZZLE GAME
+
+    </div>
+
+</header>
+
+
+
+<!-- =====================================================
+                         分数
+===================================================== -->
+
+<div class="info">
+
+
+    <div class="score-box">
+
+        <span class="score-label">
+
+            SCORE
+
+        </span>
+
+        <span id="score">
+
+            0
+
+        </span>
+
+    </div>
+
+
+    <button
+        class="new-game"
+        id="newGame">
+
+        NEW GAME
+
+    </button>
+
+
+</div>
+
+
+
+<!-- =====================================================
+                         游戏区域
+===================================================== -->
+
+<div class="game-wrapper">
+
+
+    <canvas id="gameCanvas"></canvas>
+
+
+    <div
+        class="overlay"
+        id="overlay">
+
+
+        <div
+            class="overlay-title"
+            id="overlayTitle">
+
+            GAME OVER
+
+        </div>
+
+
+        <div
+            class="overlay-sub"
+            id="overlaySub">
+
+            No more moves.
+
+        </div>
+
+
+        <button id="overlayButton">
+
+            TRY AGAIN
+
+        </button>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+                         手机方向键
+===================================================== -->
+
+<div class="controls">
+
+
+    <button
+        class="control up"
+        data-direction="up">
+
+        ↑
+
+    </button>
+
+
+    <button
+        class="control left"
+        data-direction="left">
+
+        ←
+
+    </button>
+
+
+    <button
+        class="control down"
+        data-direction="down">
+
+        ↓
+
+    </button>
+
+
+    <button
+        class="control right"
+        data-direction="right">
+
+        →
+
+    </button>
+
+
+</div>
+
+
+
+<div class="hint">
+
+    <b>Arrow Keys</b>
+    to move
+    ·
+    <b>Swipe</b>
+    on mobile
+    ·
+    Reach <b>2048</b> to win
+
+</div>
+
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+                         基本参数
+========================================================= */
+
+const SIZE = 4;
+
+
+/* =========================================================
+                         Canvas
+========================================================= */
+
+const canvas =
+    document.getElementById("gameCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+/* =========================================================
+                         游戏状态
+========================================================= */
+
+let board;
+
+let score = 0;
+
+let gameOver = false;
+
+let audioContext = null;
+
+
+function playMergeSound(){
+
+    try{
+
+        if(!audioContext){
+
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+        }
+
+
+        if(
+            audioContext.state ===
+            "suspended"
+        ){
+
+            audioContext.resume();
+
+        }
+
+
+        const now =
+            audioContext.currentTime;
+
+
+        /*
+         * 主体声音
+         */
+
+        const oscillator =
+            audioContext.createOscillator();
+
+
+        const gain =
+            audioContext.createGain();
+
+
+        oscillator.type =
+            "triangle";
+
+
+        /*
+         * 固定音高
+         * 不随方块数字变化
+         */
+
+        oscillator.frequency.setValueAtTime(
+            520,
+            now
+        );
+
+
+        /*
+         * 瞬间攻击 + 快速衰减
+         */
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.18,
+            now + 0.004
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + 0.065
+        );
+
+
+        oscillator.connect(gain);
+
+        gain.connect(
+            audioContext.destination
+        );
+
+
+        oscillator.start(now);
+
+        oscillator.stop(
+            now + 0.07
+        );
+
+
+        /*
+         * 再叠加一个极短的 click
+         * 增加“啪”的感觉
+         */
+
+        const buffer =
+            audioContext.createBuffer(
+                1,
+                audioContext.sampleRate * 0.025,
+                audioContext.sampleRate
+            );
+
+
+        const data =
+            buffer.getChannelData(0);
+
+
+        for(
+            let i=0;
+            i<data.length;
+            i++
+        ){
+
+            /*
+             * 白噪声快速衰减
+             */
+
+            data[i] =
+                (
+                    Math.random() * 2 - 1
+                ) *
+                Math.pow(
+                    1 - i / data.length,
+                    5
+                );
+
+        }
+
+
+        const noise =
+            audioContext.createBufferSource();
+
+
+        const noiseGain =
+            audioContext.createGain();
+
+
+        noise.buffer =
+            buffer;
+
+
+        noiseGain.gain.setValueAtTime(
+            0.035,
+            now
+        );
+
+
+        noiseGain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + 0.025
+        );
+
+
+        noise.connect(
+            noiseGain
+        );
+
+
+        noiseGain.connect(
+            audioContext.destination
+        );
+
+
+        noise.start(now);
+
+    }catch(error){
+
+        console.log(
+            "Audio unavailable."
+        );
+
+    }
+
+}
+
+let won = false;
+
+let keepPlaying = false;
+
+
+/* =========================================================
+                         Canvas 自适应
+========================================================= */
+
+function resizeCanvas(){
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+    canvas.width =
+        rect.width * dpr;
+
+    canvas.height =
+        rect.height * dpr;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    draw();
+
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/* =========================================================
+                         创建棋盘
+========================================================= */
+
+function createBoard(){
+
+    return Array.from(
+        {length:SIZE},
+        () => Array(SIZE).fill(0)
+    );
+
+}
+
+
+/* =========================================================
+                         随机生成方块
+========================================================= */
+
+function addTile(){
+
+    const empty = [];
+
+
+    for(let r=0;r<SIZE;r++){
+
+        for(let c=0;c<SIZE;c++){
+
+            if(board[r][c] === 0){
+
+                empty.push({
+                    r,
+                    c
+                });
+
+            }
+
+        }
+
+    }
+
+
+    if(empty.length === 0){
+
+        return;
+
+    }
+
+
+    const cell =
+        empty[
+            Math.floor(
+                Math.random() *
+                empty.length
+            )
+        ];
+
+
+    board[cell.r][cell.c] =
+        Math.random() < 0.9
+        ? 2
+        : 4;
+
+}
+
+
+/* =========================================================
+                         开始新游戏
+========================================================= */
+
+function newGame(){
+
+    board =
+        createBoard();
+
+    score =
+        0;
+
+    gameOver =
+        false;
+
+    won =
+        false;
+
+    keepPlaying =
+        false;
+
+
+    hideOverlay();
+
+
+    addTile();
+
+    addTile();
+
+
+    updateScore();
+
+    draw();
+
+}
+
+
+/* =========================================================
+                         压缩一行
+========================================================= */
+
+function slide(row){
+
+    return row.filter(
+        value => value !== 0
+    );
+
+}
+
+
+/* =========================================================
+                         合并一行
+========================================================= */
+
+function mergeRow(row){
+
+    let result =
+        slide(row);
+
+    let merged = [];
+
+
+    for(
+        let i=0;
+        i<result.length;
+        i++
+    ){
+
+        if(
+            i < result.length - 1 &&
+            result[i] === result[i+1]
+        ){
+
+            const value =
+                result[i] * 2;
+
+
+            merged.push(value);
+
+            score += value;
+
+	    playMergeSound();
+
+            i++;
+
+        }else{
+
+            merged.push(
+                result[i]
+            );
+
+        }
+
+    }
+
+
+    while(
+        merged.length < SIZE
+    ){
+
+        merged.push(0);
+
+    }
+
+
+    return merged;
+
+}
+
+
+/* =========================================================
+                         左移
+========================================================= */
+
+function moveLeft(){
+
+    let moved =
+        false;
+
+
+    for(let r=0;r<SIZE;r++){
+
+        const oldRow =
+            [...board[r]];
+
+
+        const newRow =
+            mergeRow(oldRow);
+
+
+        board[r] =
+            newRow;
+
+
+        if(
+            !arraysEqual(
+                oldRow,
+                newRow
+            )
+        ){
+
+            moved =
+                true;
+
+        }
+
+    }
+
+
+    return moved;
+
+}
+
+
+/* =========================================================
+                         右移
+========================================================= */
+
+function moveRight(){
+
+    let moved =
+        false;
+
+
+    for(let r=0;r<SIZE;r++){
+
+        const oldRow =
+            [...board[r]];
+
+
+        const reversed =
+            [...oldRow].reverse();
+
+
+        const merged =
+            mergeRow(reversed);
+
+
+        const newRow =
+            merged.reverse();
+
+
+        board[r] =
+            newRow;
+
+
+        if(
+            !arraysEqual(
+                oldRow,
+                newRow
+            )
+        ){
+
+            moved =
+                true;
+
+        }
+
+    }
+
+
+    return moved;
+
+}
+
+
+/* =========================================================
+                         上移
+========================================================= */
+
+function moveUp(){
+
+    let moved =
+        false;
+
+
+    for(let c=0;c<SIZE;c++){
+
+        const oldCol = [];
+
+
+        for(let r=0;r<SIZE;r++){
+
+            oldCol.push(
+                board[r][c]
+            );
+
+        }
+
+
+        const newCol =
+            mergeRow(oldCol);
+
+
+        for(let r=0;r<SIZE;r++){
+
+            board[r][c] =
+                newCol[r];
+
+        }
+
+
+        if(
+            !arraysEqual(
+                oldCol,
+                newCol
+            )
+        ){
+
+            moved =
+                true;
+
+        }
+
+    }
+
+
+    return moved;
+
+}
+
+
+/* =========================================================
+                         下移
+========================================================= */
+
+function moveDown(){
+
+    let moved =
+        false;
+
+
+    for(let c=0;c<SIZE;c++){
+
+        const oldCol = [];
+
+
+        for(let r=0;r<SIZE;r++){
+
+            oldCol.push(
+                board[r][c]
+            );
+
+        }
+
+
+        const reversed =
+            [...oldCol].reverse();
+
+
+        const merged =
+            mergeRow(reversed);
+
+
+        const newCol =
+            merged.reverse();
+
+
+        for(let r=0;r<SIZE;r++){
+
+            board[r][c] =
+                newCol[r];
+
+        }
+
+
+        if(
+            !arraysEqual(
+                oldCol,
+                newCol
+            )
+        ){
+
+            moved =
+                true;
+
+        }
+
+    }
+
+
+    return moved;
+
+}
+
+
+/* =========================================================
+                         数组比较
+========================================================= */
+
+function arraysEqual(a,b){
+
+    if(a.length !== b.length){
+
+        return false;
+
+    }
+
+
+    for(let i=0;i<a.length;i++){
+
+        if(a[i] !== b[i]){
+
+            return false;
+
+        }
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+                         检查是否可以移动
+========================================================= */
+
+function canMove(){
+
+    /*
+     * 还有空格
+     */
+
+    for(let r=0;r<SIZE;r++){
+
+        for(let c=0;c<SIZE;c++){
+
+            if(board[r][c] === 0){
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * 横向是否存在相同数字
+     */
+
+    for(let r=0;r<SIZE;r++){
+
+        for(let c=0;c<SIZE-1;c++){
+
+            if(
+                board[r][c] ===
+                board[r][c+1]
+            ){
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * 纵向是否存在相同数字
+     */
+
+    for(let c=0;c<SIZE;c++){
+
+        for(let r=0;r<SIZE-1;r++){
+
+            if(
+                board[r][c] ===
+                board[r+1][c]
+            ){
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+                         检查 2048
+========================================================= */
+
+function checkWin(){
+
+    for(let r=0;r<SIZE;r++){
+
+        for(let c=0;c<SIZE;c++){
+
+            if(board[r][c] === 2048){
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+                         执行移动
+========================================================= */
+
+function move(direction){
+
+    if(gameOver){
+
+        return;
+
+    }
+
+
+    if(won && !keepPlaying){
+
+        return;
+
+    }
+
+
+    let moved =
+        false;
+
+
+    switch(direction){
+
+        case "left":
+
+            moved =
+                moveLeft();
+
+            break;
+
+
+        case "right":
+
+            moved =
+                moveRight();
+
+            break;
+
+
+        case "up":
+
+            moved =
+                moveUp();
+
+            break;
+
+
+        case "down":
+
+            moved =
+                moveDown();
+
+            break;
+
+    }
+
+
+    /*
+     * 没有发生变化
+     */
+
+    if(!moved){
+
+        return;
+
+    }
+
+
+    /*
+     * 和 MATLAB 版本一样：
+     * 只有成功移动后才生成新方块。
+     */
+
+    addTile();
+
+
+    updateScore();
+
+    draw();
+
+
+    /*
+     * 胜利
+     */
+
+    if(
+        !won &&
+        checkWin()
+    ){
+
+        won =
+            true;
+
+        showWin();
+
+    }
+
+
+    /*
+     * 游戏结束
+     */
+
+    if(!canMove()){
+
+        gameOver =
+            true;
+
+        showGameOver();
+
+    }
+
+}
+
+
+/* =========================================================
+                         更新分数
+========================================================= */
+
+function updateScore(){
+
+    document
+        .getElementById("score")
+        .textContent =
+        score;
+
+}
+
+
+/* =========================================================
+                         方块颜色
+========================================================= */
+
+function getTileStyle(value){
+
+    const colors = {
+
+        0:{
+            bg:"#182337",
+            text:"transparent"
+        },
+
+        2:{
+            bg:"#eee4da",
+            text:"#776e65"
+        },
+
+        4:{
+            bg:"#ede0c8",
+            text:"#776e65"
+        },
+
+        8:{
+            bg:"#f2b179",
+            text:"#ffffff"
+        },
+
+        16:{
+            bg:"#f59563",
+            text:"#ffffff"
+        },
+
+        32:{
+            bg:"#f67c5f",
+            text:"#ffffff"
+        },
+
+        64:{
+            bg:"#f65e3b",
+            text:"#ffffff"
+        },
+
+        128:{
+            bg:"#edcf72",
+            text:"#ffffff"
+        },
+
+        256:{
+            bg:"#edcc61",
+            text:"#ffffff"
+        },
+
+        512:{
+            bg:"#edc850",
+            text:"#ffffff"
+        },
+
+        1024:{
+            bg:"#edc53f",
+            text:"#ffffff"
+        },
+
+        2048:{
+            bg:"#edc22e",
+            text:"#ffffff"
+        }
+
+    };
+
+
+    if(
+        colors[value]
+    ){
+
+        return colors[value];
+
+    }
+
+
+    return {
+
+        bg:"#244d79",
+
+        text:"#ffffff"
+
+    };
+
+}
+
+
+/* =========================================================
+                         绘制圆角矩形
+========================================================= */
+
+function roundedRect(
+    x,
+    y,
+    width,
+    height,
+    radius
+){
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x,
+        y,
+        width,
+        height,
+        radius
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================================================
+                         绘制棋盘
+========================================================= */
+
+function draw(){
+
+    if(!board){
+
+        return;
+
+    }
+
+
+    const width =
+        canvas.clientWidth;
+
+    const height =
+        canvas.clientHeight;
+
+
+    /*
+     * 背景
+     */
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    ctx.fillStyle =
+        "#101a2b";
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /*
+     * 间距
+     */
+
+    const gap =
+        Math.max(
+            7,
+            width * 0.025
+        );
+
+
+    const tileSize =
+        (
+            width -
+            gap * 5
+        ) / 4;
+
+
+    /*
+     * 绘制 16 个格子
+     */
+
+    for(let r=0;r<SIZE;r++){
+
+        for(let c=0;c<SIZE;c++){
+
+            const x =
+                gap +
+                c *
+                (tileSize + gap);
+
+
+            const y =
+                gap +
+                r *
+                (tileSize + gap);
+
+
+            const value =
+                board[r][c];
+
+
+            const style =
+                getTileStyle(value);
+
+
+            ctx.fillStyle =
+                style.bg;
+
+
+            roundedRect(
+                x,
+                y,
+                tileSize,
+                tileSize,
+                Math.max(
+                    6,
+                    tileSize * .08
+                )
+            );
+
+
+            if(value !== 0){
+
+                /*
+                 * 数字大小
+                 */
+
+                let fontSize;
+
+
+                if(value < 100){
+
+                    fontSize =
+                        tileSize * .34;
+
+                }else if(value < 1000){
+
+                    fontSize =
+                        tileSize * .29;
+
+                }else{
+
+                    fontSize =
+                        tileSize * .22;
+
+                }
+
+
+                ctx.fillStyle =
+                    style.text;
+
+
+                ctx.font =
+                    `700 ${fontSize}px Inter, "Segoe UI", sans-serif`;
+
+
+                ctx.textAlign =
+                    "center";
+
+
+                ctx.textBaseline =
+                    "middle";
+
+
+                ctx.fillText(
+
+                    value.toString(),
+
+                    x +
+                    tileSize / 2,
+
+                    y +
+                    tileSize / 2
+
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+                         Overlay
+========================================================= */
+
+function showOverlay(
+    title,
+    subtitle
+){
+
+    document
+        .getElementById("overlayTitle")
+        .textContent =
+        title;
+
+
+    document
+        .getElementById("overlaySub")
+        .textContent =
+        subtitle;
+
+
+    document
+        .getElementById("overlay")
+        .classList
+        .add("show");
+
+}
+
+
+function hideOverlay(){
+
+    document
+        .getElementById("overlay")
+        .classList
+        .remove("show");
+
+}
+
+
+/* =========================================================
+                         胜利
+========================================================= */
+
+function showWin(){
+
+    showOverlay(
+
+        "YOU WIN!",
+
+        "You reached 2048."
+
+    );
+
+
+    document
+        .getElementById("overlayButton")
+        .textContent =
+        "KEEP PLAYING";
+
+}
+
+
+/* =========================================================
+                         游戏结束
+========================================================= */
+
+function showGameOver(){
+
+    showOverlay(
+
+        "GAME OVER",
+
+        "No more moves."
+
+    );
+
+
+    document
+        .getElementById("overlayButton")
+        .textContent =
+        "TRY AGAIN";
+
+}
+
+
+/* =========================================================
+                         Overlay 按钮
+========================================================= */
+
+document
+    .getElementById("overlayButton")
+    .addEventListener(
+
+        "click",
+
+        () => {
+
+            if(won && !keepPlaying){
+
+                keepPlaying =
+                    true;
+
+                hideOverlay();
+
+            }else{
+
+                newGame();
+
+            }
+
+        }
+
+    );
+
+
+/* =========================================================
+                         新游戏
+========================================================= */
+
+document
+    .getElementById("newGame")
+    .addEventListener(
+
+        "click",
+
+        newGame
+
+    );
+
+
+/* =========================================================
+                         键盘控制
+========================================================= */
+
+document.addEventListener(
+
+    "keydown",
+
+    event => {
+
+        const keys = {
+
+            ArrowLeft:"left",
+
+            ArrowRight:"right",
+
+            ArrowUp:"up",
+
+            ArrowDown:"down"
+
+        };
+
+
+        if(
+            keys[event.key]
+        ){
+
+            event.preventDefault();
+
+            move(
+                keys[event.key]
+            );
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+                         屏幕按钮
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".control"
+    )
+    .forEach(
+
+        button => {
+
+            button.addEventListener(
+
+                "click",
+
+                () => {
+
+                    move(
+                        button.dataset.direction
+                    );
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+/* =========================================================
+                         触摸滑动
+========================================================= */
+
+let touchStartX = 0;
+
+let touchStartY = 0;
+
+
+canvas.addEventListener(
+
+    "touchstart",
+
+    event => {
+
+        const touch =
+            event.changedTouches[0];
+
+
+        touchStartX =
+            touch.clientX;
+
+        touchStartY =
+            touch.clientY;
+
+    },
+
+    {
+        passive:true
+    }
+
+);
+
+
+canvas.addEventListener(
+
+    "touchend",
+
+    event => {
+
+        const touch =
+            event.changedTouches[0];
+
+
+        const dx =
+            touch.clientX -
+            touchStartX;
+
+
+        const dy =
+            touch.clientY -
+            touchStartY;
+
+
+        const threshold =
+            25;
+
+
+        if(
+            Math.abs(dx) <
+            threshold &&
+            Math.abs(dy) <
+            threshold
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            Math.abs(dx) >
+            Math.abs(dy)
+        ){
+
+            if(dx > 0){
+
+                move("right");
+
+            }else{
+
+                move("left");
+
+            }
+
+        }else{
+
+            if(dy > 0){
+
+                move("down");
+
+            }else{
+
+                move("up");
+
+            }
+
+        }
+
+    },
+
+    {
+        passive:true
+    }
+
+);
+
+
+/* =========================================================
+                         初始化
+========================================================= */
+
+newGame();
+
+resizeCanvas();
+
+</script>
+
+</body>
+</html>
