@@ -69,7 +69,20 @@ body{
 
 .page{
 
-    width:min(560px,94vw);
+    /*
+     * 电脑端稍微缩小整体宽度
+     *
+     * 原来：
+     * width:min(560px,94vw);
+     *
+     * 现在：
+     * width:min(500px,94vw);
+     *
+     * 手机端仍然由 94vw 控制，
+     * 因此移动端布局基本保持原样。
+     */
+
+    width:min(500px,94vw);
 
     padding:
         28px
@@ -823,12 +836,6 @@ function playMergeSound(){
                          轻度压缩
            ================================================= */
 
-        /*
-         * 手机扬声器和电脑扬声器的表现差异比较大，
-         * 这里增加一个轻度 compressor，
-         * 在提高音量的同时避免峰值过于刺耳。
-         */
-
         const compressor =
             audioContext.createDynamicsCompressor();
 
@@ -870,26 +877,11 @@ function playMergeSound(){
             "triangle";
 
 
-        /*
-         * 固定音高
-         * 不随方块数字变化
-         */
-
         oscillator.frequency.setValueAtTime(
             520,
             now
         );
 
-
-        /*
-         * 提高合成音效音量。
-         *
-         * 原来：
-         * 0.18
-         *
-         * 现在：
-         * 0.38
-         */
 
         gain.gain.setValueAtTime(
             0.0001,
@@ -927,13 +919,6 @@ function playMergeSound(){
                          Click 音效
            ================================================= */
 
-        /*
-         * 再叠加一个极短的 click，
-         * 增加“啪”的感觉。
-         *
-         * 同样提高音量。
-         */
-
         const buffer =
             audioContext.createBuffer(
                 1,
@@ -954,10 +939,6 @@ function playMergeSound(){
             i<data.length;
             i++
         ){
-
-            /*
-             * 白噪声快速衰减
-             */
 
             data[i] =
                 (
@@ -982,14 +963,6 @@ function playMergeSound(){
         noise.buffer =
             buffer;
 
-
-        /*
-         * 原来：
-         * 0.035
-         *
-         * 现在：
-         * 0.07
-         */
 
         noiseGain.gain.setValueAtTime(
             0.11,
@@ -1215,11 +1188,6 @@ function mergeRow(row){
 
             score += value;
 
-
-            /*
-             * 每次发生合成，
-             * 播放增强后的音效。
-             */
 
             playMergeSound();
 
@@ -1502,10 +1470,6 @@ function arraysEqual(a,b){
 
 function canMove(){
 
-    /*
-     * 还有空格
-     */
-
     for(let r=0;r<SIZE;r++){
 
         for(let c=0;c<SIZE;c++){
@@ -1520,10 +1484,6 @@ function canMove(){
 
     }
 
-
-    /*
-     * 横向是否存在相同数字
-     */
 
     for(let r=0;r<SIZE;r++){
 
@@ -1542,10 +1502,6 @@ function canMove(){
 
     }
 
-
-    /*
-     * 纵向是否存在相同数字
-     */
 
     for(let c=0;c<SIZE;c++){
 
@@ -1656,21 +1612,12 @@ function move(direction){
     }
 
 
-    /*
-     * 没有发生变化
-     */
-
     if(!moved){
 
         return;
 
     }
 
-
-    /*
-     * 和 MATLAB 版本一样：
-     * 只有成功移动后才生成新方块。
-     */
 
     addTile();
 
@@ -1679,10 +1626,6 @@ function move(direction){
 
     draw();
 
-
-    /*
-     * 胜利
-     */
 
     if(
         !won &&
@@ -1696,10 +1639,6 @@ function move(direction){
 
     }
 
-
-    /*
-     * 游戏结束
-     */
 
     if(!canMove()){
 
@@ -1865,10 +1804,6 @@ function draw(){
         canvas.clientHeight;
 
 
-    /*
-     * 背景
-     */
-
     ctx.clearRect(
         0,
         0,
@@ -1888,10 +1823,6 @@ function draw(){
     );
 
 
-    /*
-     * 间距
-     */
-
     const gap =
         Math.max(
             7,
@@ -1905,10 +1836,6 @@ function draw(){
             gap * 5
         ) / 4;
 
-
-    /*
-     * 绘制 16 个格子
-     */
 
     for(let r=0;r<SIZE;r++){
 
@@ -1951,10 +1878,6 @@ function draw(){
 
 
             if(value !== 0){
-
-                /*
-                 * 数字大小
-                 */
 
                 let fontSize;
 
