@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -15,9 +14,6 @@
    ========================================================= */
 
 :root{
-    /*
-     * 游戏库整体深蓝色基调
-     */
 
     --bg:#07111f;
 
@@ -35,30 +31,15 @@
 
     --muted-light:#a8b8ca;
 
-
-    /*
-     * 贪吃蛇
-     */
-
     --green:#55d66f;
 
     --green-dark:#329b4d;
 
     --green-light:#79ed8b;
 
-
-    /*
-     * 食物
-     */
-
     --red:#f05252;
 
     --red-dark:#b93636;
-
-
-    /*
-     * 棋盘
-     */
 
     --board:#091827;
 
@@ -77,6 +58,7 @@
 
 html,
 body{
+
     margin:0;
     padding:0;
 
@@ -97,7 +79,9 @@ body{
 
 
 body{
+
     min-height:100vh;
+
     background:
         radial-gradient(
             circle at 50% -15%,
@@ -106,8 +90,11 @@ body{
             #050d1c 65%,
             #020611 100%
         );
+
     display:flex;
+
     flex-direction:column;
+
     overflow-x:hidden;
 }
 
@@ -136,10 +123,6 @@ body{
         rgba(7,17,31,0.97);
 }
 
-
-/* ---------------------------------------------------------
-                     Game Library
-   --------------------------------------------------------- */
 
 .header-back{
 
@@ -179,10 +162,6 @@ body{
 }
 
 
-/* ---------------------------------------------------------
-                         标题
-   --------------------------------------------------------- */
-
 .header-title{
 
     margin:0;
@@ -198,10 +177,6 @@ body{
     line-height:1;
 }
 
-
-/* ---------------------------------------------------------
-                         CHENZI
-   --------------------------------------------------------- */
 
 .header-brand{
 
@@ -292,10 +267,6 @@ body{
 }
 
 
-/* ---------------------------------------------------------
-                         分数
-   --------------------------------------------------------- */
-
 .score-box{
 
     display:flex;
@@ -330,10 +301,6 @@ body{
 }
 
 
-/* ---------------------------------------------------------
-                         速度
-   --------------------------------------------------------- */
-
 .speed{
 
     color:var(--muted);
@@ -364,7 +331,6 @@ body{
     border-radius:10px;
 
     overflow:hidden;
-
 }
 
 
@@ -511,6 +477,20 @@ body{
 
 
 /* =========================================================
+                  手机专用控制区域
+                  
+                  默认隐藏
+                  因此电脑端完全不会出现
+   ========================================================= */
+
+.mobile-controls{
+
+    display:none;
+
+}
+
+
+/* =========================================================
                          手机适配
    ========================================================= */
 
@@ -591,6 +571,192 @@ body{
             0 5px;
     }
 
+
+    /* =====================================================
+                       手机专用控制器
+       ===================================================== */
+
+    .mobile-controls{
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        margin-top:14px;
+
+        width:100%;
+
+        gap:7px;
+
+        -webkit-user-select:none;
+
+        user-select:none;
+
+        touch-action:none;
+    }
+
+
+    .mobile-row{
+
+        display:flex;
+
+        justify-content:center;
+
+        gap:7px;
+    }
+
+
+    .mobile-control-btn{
+
+        width:54px;
+
+        height:46px;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        border:
+            1px solid var(--line-light);
+
+        border-bottom-width:2px;
+
+        border-radius:9px;
+
+        background:
+            var(--panel2);
+
+        color:#dbe8f7;
+
+        font-size:20px;
+
+        font-weight:700;
+
+        line-height:1;
+
+        box-shadow:
+            0 4px 10px
+            rgba(0,0,0,.18);
+
+        -webkit-user-select:none;
+
+        user-select:none;
+
+        -webkit-tap-highlight-color:transparent;
+
+        touch-action:none;
+
+        transition:
+            background .08s,
+            transform .08s,
+            border-color .08s;
+    }
+
+
+    .mobile-control-btn:active{
+
+        background:#1b3049;
+
+        border-color:#3a5878;
+
+        transform:translateY(1px);
+    }
+
+
+    .mobile-start{
+
+        width:115px;
+
+        height:40px;
+
+        margin-top:3px;
+
+        border:
+            1px solid #315cff;
+
+        border-radius:8px;
+
+        background:#315cff;
+
+        color:#fff;
+
+        font-size:12px;
+
+        font-weight:800;
+
+        letter-spacing:.5px;
+
+        box-shadow:
+            0 5px 15px
+            rgba(49,92,255,.18);
+
+        touch-action:none;
+
+        -webkit-tap-highlight-color:transparent;
+    }
+
+
+    .mobile-start:active{
+
+        background:#4770ff;
+
+        transform:translateY(1px);
+    }
+
+
+    /*
+     * 手机端不再显示电脑键盘操作说明。
+     */
+
+    .controls{
+
+        display:none;
+    }
+
+}
+
+
+/* =========================================================
+                  很小屏幕手机
+   ========================================================= */
+
+@media(max-width:380px){
+
+    .mobile-control-btn{
+
+        width:50px;
+
+        height:43px;
+
+        font-size:18px;
+    }
+
+
+    .mobile-controls{
+
+        margin-top:11px;
+
+        gap:5px;
+    }
+
+
+    .mobile-row{
+
+        gap:5px;
+    }
+
+
+    .mobile-start{
+
+        height:38px;
+
+        width:108px;
+    }
+
 }
 
 </style>
@@ -607,8 +773,6 @@ body{
 <header class="header">
 
 
-    <!-- 左上角 -->
-
     <a
         class="header-back"
         href="../../index.html"
@@ -617,14 +781,10 @@ body{
     </a>
 
 
-    <!-- 中间 -->
-
     <h1 class="header-title">
         SNAKE
     </h1>
 
-
-    <!-- 右上角 -->
 
     <div class="header-brand">
         CHENZI
@@ -719,6 +879,73 @@ body{
 
 
             </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+                     手机专用控制区域
+                     
+                     电脑端不会显示
+             ================================================= -->
+
+        <div
+            class="mobile-controls"
+            id="mobileControls"
+        >
+
+
+            <div class="mobile-row">
+
+                <button
+                    class="mobile-control-btn"
+                    data-direction="up"
+                    aria-label="向上"
+                >
+                    ↑
+                </button>
+
+            </div>
+
+
+            <div class="mobile-row">
+
+                <button
+                    class="mobile-control-btn"
+                    data-direction="left"
+                    aria-label="向左"
+                >
+                    ←
+                </button>
+
+
+                <button
+                    class="mobile-control-btn"
+                    data-direction="down"
+                    aria-label="向下"
+                >
+                    ↓
+                </button>
+
+
+                <button
+                    class="mobile-control-btn"
+                    data-direction="right"
+                    aria-label="向右"
+                >
+                    →
+                </button>
+
+            </div>
+
+
+            <button
+                class="mobile-start"
+                id="mobileStartBtn"
+            >
+                START
+            </button>
 
 
         </div>
@@ -839,42 +1066,46 @@ const bgm =
     );
 
 
+const mobileStartBtn =
+    document.getElementById(
+        "mobileStartBtn"
+    );
+
+
+const mobileControlButtons =
+    document.querySelectorAll(
+        ".mobile-control-btn"
+    );
+
+
+/* =========================================================
+                     设备判断
+                     
+                     只用于新增手机功能。
+                     
+                     电脑端原逻辑不改变。
+   ========================================================= */
+
+function isMobileDevice(){
+
+    return window.matchMedia(
+        "(max-width:600px)"
+    ).matches;
+
+}
+
+
 /* =========================================================
                          游戏参数
    ========================================================= */
 
 const BOARD_SIZE = 20;
 
-
-/*
- * 初始蛇长度
- */
-
 const INITIAL_LENGTH = 4;
-
-
-/*
- * 初始移动间隔
- *
- * 150ms
- */
 
 const INITIAL_DELAY = 150;
 
-
-/*
- * 最快移动间隔
- *
- * 80ms
- */
-
 const MIN_DELAY = 80;
-
-
-/*
- * 每吃一个豆子
- * 加速 3ms
- */
 
 const SPEED_UP = 3;
 
@@ -920,11 +1151,6 @@ let gameOver = false;
 let lastMove = 0;
 
 
-/*
- * 防止同一个移动周期
- * 连续改变方向。
- */
-
 let directionChanged = false;
 
 
@@ -934,10 +1160,6 @@ let directionChanged = false;
 
 let audioContext = null;
 
-
-/* ---------------------------------------------------------
-                   创建 AudioContext
-   --------------------------------------------------------- */
 
 function initAudio(){
 
@@ -968,20 +1190,6 @@ function initAudio(){
                      吃豆 BO 音效
    ========================================================= */
 
-/*
- * 这里专门增强了音效。
- *
- * 相比上一版：
- *
- * 1. 音量明显提高
- * 2. 增加第二个谐波
- * 3. 高频部分更加明显
- * 4. 衰减仍然很短
- *
- * 所以不会变成刺耳的长音，
- * 但在 BGM 下会明显听到 BO。
- */
-
 function playBo(){
 
     initAudio();
@@ -991,44 +1199,21 @@ function playBo(){
         audioContext.currentTime;
 
 
-    /*
-     * 主音
-     */
-
     const oscillator =
         audioContext.createOscillator();
 
-
-    /*
-     * 第二层高频音，
-     * 增加声音的存在感。
-     */
 
     const oscillator2 =
         audioContext.createOscillator();
 
 
-    /*
-     * 主音音量
-     */
-
     const gain =
         audioContext.createGain();
 
 
-    /*
-     * 高频音音量
-     */
-
     const gain2 =
         audioContext.createGain();
 
-
-    /*
-     * 总压缩器。
-     *
-     * 防止增强后的 BO 爆音。
-     */
 
     const compressor =
         audioContext.createDynamicsCompressor();
@@ -1045,10 +1230,6 @@ function playBo(){
     compressor.release.value = 0.08;
 
 
-    /* =====================================================
-                         主音
-       ===================================================== */
-
     oscillator.type =
         "square";
 
@@ -1064,10 +1245,6 @@ function playBo(){
         now + 0.13
     );
 
-
-    /*
-     * 明显提高音量。
-     */
 
     gain.gain.setValueAtTime(
         0.0001,
@@ -1086,10 +1263,6 @@ function playBo(){
         now + 0.14
     );
 
-
-    /* =====================================================
-                         高频层
-       ===================================================== */
 
     oscillator2.type =
         "triangle";
@@ -1125,10 +1298,6 @@ function playBo(){
     );
 
 
-    /*
-     * 连接。
-     */
-
     oscillator.connect(gain);
 
     oscillator2.connect(gain2);
@@ -1141,10 +1310,6 @@ function playBo(){
         audioContext.destination
     );
 
-
-    /*
-     * 开始 / 停止。
-     */
 
     oscillator.start(now);
 
@@ -1167,11 +1332,6 @@ function playBo(){
    ========================================================= */
 
 function startMusic(){
-
-    /*
-     * BGM 音量适当降低，
-     * 给 BO 留出空间。
-     */
 
     bgm.volume = 0.22;
 
@@ -1226,10 +1386,6 @@ function drawBoard(){
         cellSize();
 
 
-    /*
-     * 深蓝色棋盘底。
-     */
-
     ctx.fillStyle =
         "#091827";
 
@@ -1241,10 +1397,6 @@ function drawBoard(){
         canvas.height
     );
 
-
-    /*
-     * 棋盘网格。
-     */
 
     ctx.strokeStyle =
         "#14283d";
@@ -1317,10 +1469,6 @@ function drawSnake(){
         cellSize();
 
 
-    /*
-     * 从尾部向蛇头绘制。
-     */
-
     for(
         let i =
             snake.length - 1;
@@ -1333,10 +1481,6 @@ function drawSnake(){
         const segment =
             snake[i];
 
-
-        /*
-         * 蛇头比身体稍大。
-         */
 
         const padding =
             i === 0
@@ -1365,10 +1509,6 @@ function drawSnake(){
                 width * 0.18
             );
 
-
-        /*
-         * 蛇头颜色。
-         */
 
         if(i === 0){
 
@@ -1519,10 +1659,6 @@ function drawFood(){
         size * 0.28;
 
 
-    /*
-     * 外层微弱光晕。
-     */
-
     ctx.beginPath();
 
 
@@ -1541,10 +1677,6 @@ function drawFood(){
 
     ctx.fill();
 
-
-    /*
-     * 食物主体。
-     */
 
     ctx.beginPath();
 
@@ -1575,10 +1707,6 @@ function drawFood(){
 
     ctx.stroke();
 
-
-    /*
-     * 高光。
-     */
 
     ctx.beginPath();
 
@@ -1624,11 +1752,6 @@ function createFood(){
 
     while(true){
 
-        /*
-         * 食物保持和 MATLAB 版本
-         * 一样不会紧贴棋盘边缘。
-         */
-
         const position = {
 
             x:
@@ -1646,10 +1769,6 @@ function createFood(){
 
         };
 
-
-        /*
-         * 不得生成在蛇身上。
-         */
 
         const occupied =
             snake.some(
@@ -1682,15 +1801,6 @@ function initializeGame(){
 
     snake = [];
 
-
-    /*
-     * 初始蛇：
-     *
-     * 10 10
-     *  9 10
-     *  8 10
-     *  7 10
-     */
 
     for(
         let i = 0;
@@ -1758,21 +1868,31 @@ function initializeGame(){
         createFood();
 
 
-    /*
-     * 初始提示。
-     */
-
     overlayTitle.textContent =
         "SNAKE";
 
 
     overlayText.innerHTML =
-        "按 SPACE 开始";
+        isMobileDevice()
+            ? "点击 START 开始<br>或直接点击游戏区域"
+            : "按 SPACE 开始";
 
 
     overlay.classList.remove(
         "hidden"
     );
+
+
+    /*
+     * 手机按钮状态
+     */
+
+    if(isMobileDevice()){
+
+        mobileStartBtn.textContent =
+            "START";
+
+    }
 
 
     draw();
@@ -1812,24 +1932,23 @@ function startGame(){
 
     started = true;
 
-
     gameOver = false;
 
-
-    /*
-     * 播放 BGM。
-     */
 
     startMusic();
 
 
-    /*
-     * 隐藏提示。
-     */
-
     overlay.classList.add(
         "hidden"
     );
+
+
+    if(isMobileDevice()){
+
+        mobileStartBtn.textContent =
+            "RESTART";
+
+    }
 
 
     lastMove =
@@ -1847,10 +1966,6 @@ function endGame(){
     gameOver = true;
 
 
-    /*
-     * 停止音乐。
-     */
-
     stopMusic();
 
 
@@ -1859,13 +1974,23 @@ function endGame(){
 
 
     overlayText.innerHTML =
-        `Score: ${score}<br>
-         SPACE 重新开始`;
+        isMobileDevice()
+            ? `Score: ${score}<br>点击 START 重新开始`
+            : `Score: ${score}<br>
+               SPACE 重新开始`;
 
 
     overlay.classList.remove(
         "hidden"
     );
+
+
+    if(isMobileDevice()){
+
+        mobileStartBtn.textContent =
+            "RESTART";
+
+    }
 
 
     draw();
@@ -1884,13 +2009,8 @@ function restartGame(){
 
     started = true;
 
-
     gameOver = false;
 
-
-    /*
-     * 重新播放音乐。
-     */
 
     startMusic();
 
@@ -1898,6 +2018,14 @@ function restartGame(){
     overlay.classList.add(
         "hidden"
     );
+
+
+    if(isMobileDevice()){
+
+        mobileStartBtn.textContent =
+            "RESTART";
+
+    }
 
 
     lastMove =
@@ -1915,17 +2043,9 @@ function eatFood(){
     score++;
 
 
-    /*
-     * 更新分数。
-     */
-
     scoreElement.textContent =
         score;
 
-
-    /*
-     * 逐渐加速。
-     */
 
     moveDelay =
         Math.max(
@@ -1938,16 +2058,8 @@ function eatFood(){
     updateSpeedText();
 
 
-    /*
-     * BO。
-     */
-
     playBo();
 
-
-    /*
-     * 新食物。
-     */
 
     food =
         createFood();
@@ -1961,10 +2073,6 @@ function eatFood(){
 
 function update(){
 
-    /*
-     * 应用下一方向。
-     */
-
     direction = {
 
         x:
@@ -1975,10 +2083,6 @@ function update(){
 
     };
 
-
-    /*
-     * 计算新蛇头。
-     */
 
     const newHead = {
 
@@ -2016,10 +2120,6 @@ function update(){
     }
 
 
-    /*
-     * 是否吃到食物。
-     */
-
     const willEat =
 
         newHead.x === food.x &&
@@ -2030,13 +2130,6 @@ function update(){
     /* =====================================================
                          撞自己
        ===================================================== */
-
-    /*
-     * 不吃食物：
-     *
-     * 尾巴这一帧会离开，
-     * 所以最后一格不检查。
-     */
 
     const bodyToCheck =
 
@@ -2081,12 +2174,6 @@ function update(){
     );
 
 
-    /*
-     * 吃到豆子：
-     *
-     * 不删除尾巴。
-     */
-
     if(willEat){
 
         eatFood();
@@ -2094,12 +2181,6 @@ function update(){
     }
 
     else{
-
-        /*
-         * 没吃到：
-         *
-         * 删除尾巴。
-         */
 
         snake.pop();
 
@@ -2159,6 +2240,8 @@ function gameLoop(
 
 /* =========================================================
                        键盘
+                       
+                       电脑端原逻辑保留
    ========================================================= */
 
 document.addEventListener(
@@ -2168,10 +2251,6 @@ document.addEventListener(
         const key =
             event.key.toLowerCase();
 
-
-        /* =================================================
-                           SPACE
-           ================================================= */
 
         if(
 
@@ -2187,10 +2266,6 @@ document.addEventListener(
             initAudio();
 
 
-            /*
-             * 尚未开始。
-             */
-
             if(!started){
 
                 startGame();
@@ -2199,10 +2274,6 @@ document.addEventListener(
 
             }
 
-
-            /*
-             * 游戏结束。
-             */
 
             if(gameOver){
 
@@ -2218,10 +2289,6 @@ document.addEventListener(
         }
 
 
-        /* =================================================
-                           ESC
-           ================================================= */
-
         if(key === "escape"){
 
             event.preventDefault();
@@ -2234,11 +2301,6 @@ document.addEventListener(
 
         }
 
-
-        /*
-         * 游戏未开始或结束，
-         * 不处理方向。
-         */
 
         if(
 
@@ -2253,21 +2315,12 @@ document.addEventListener(
         }
 
 
-        /*
-         * 当前移动周期已经改变过方向，
-         * 就不再接受第二次改变。
-         */
-
         if(directionChanged){
 
             return;
 
         }
 
-
-        /* =================================================
-                           上
-           ================================================= */
 
         if(
 
@@ -2276,11 +2329,6 @@ document.addEventListener(
             key === "w"
 
         ){
-
-            /*
-             * 正在向下，
-             * 不能直接向上。
-             */
 
             if(direction.y !== 1){
 
@@ -2300,10 +2348,6 @@ document.addEventListener(
 
         }
 
-
-        /* =================================================
-                           下
-           ================================================= */
 
         else if(
 
@@ -2332,10 +2376,6 @@ document.addEventListener(
         }
 
 
-        /* =================================================
-                           左
-           ================================================= */
-
         else if(
 
             key === "arrowleft" ||
@@ -2362,10 +2402,6 @@ document.addEventListener(
 
         }
 
-
-        /* =================================================
-                           右
-           ================================================= */
 
         else if(
 
@@ -2398,17 +2434,538 @@ document.addEventListener(
 
 
 /* =========================================================
+                手机方向控制
+                 
+                只在手机端启用
+   ========================================================= */
+
+function setMobileDirection(
+    dir
+){
+
+    /*
+     * 防止电脑端受到任何影响。
+     */
+
+    if(!isMobileDevice()){
+
+        return;
+
+    }
+
+
+    /*
+     * 手机还没有开始：
+     * 点击方向键也直接开始游戏。
+     *
+     * 这样用户不一定非要先找 START。
+     */
+
+    if(!started){
+
+        startGame();
+
+    }
+
+
+    /*
+     * 游戏结束：
+     * 第一次点击方向键直接重新开始。
+     */
+
+    if(gameOver){
+
+        restartGame();
+
+    }
+
+
+    /*
+     * 当前周期已经改变过方向，
+     * 与电脑键盘保持完全相同的规则。
+     */
+
+    if(directionChanged){
+
+        return;
+
+    }
+
+
+    if(dir === "up"){
+
+        if(direction.y !== 1){
+
+            nextDirection = {
+
+                x:0,
+
+                y:-1
+
+            };
+
+
+            directionChanged =
+                true;
+
+        }
+
+    }
+
+
+    else if(dir === "down"){
+
+        if(direction.y !== -1){
+
+            nextDirection = {
+
+                x:0,
+
+                y:1
+
+            };
+
+
+            directionChanged =
+                true;
+
+        }
+
+    }
+
+
+    else if(dir === "left"){
+
+        if(direction.x !== 1){
+
+            nextDirection = {
+
+                x:-1,
+
+                y:0
+
+            };
+
+
+            directionChanged =
+                true;
+
+        }
+
+    }
+
+
+    else if(dir === "right"){
+
+        if(direction.x !== -1){
+
+            nextDirection = {
+
+                x:1,
+
+                y:0
+
+            };
+
+
+            directionChanged =
+                true;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+                  手机按钮事件
+   ========================================================= */
+
+mobileControlButtons.forEach(
+    button=>{
+
+        /*
+         * pointerdown 比 click 更适合手机。
+         */
+
+        button.addEventListener(
+            "pointerdown",
+            function(event){
+
+                if(
+                    !isMobileDevice()
+                ){
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                const directionName =
+                    button.dataset.direction;
+
+
+                setMobileDirection(
+                    directionName
+                );
+
+
+                /*
+                 * 轻微震动反馈。
+                 */
+
+                if(
+                    navigator.vibrate
+                ){
+
+                    navigator.vibrate(12);
+
+                }
+
+            },
+            {
+                passive:false
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+                    手机 START / RESTART
+   ========================================================= */
+
+mobileStartBtn.addEventListener(
+    "pointerdown",
+    function(event){
+
+        if(
+            !isMobileDevice()
+        ){
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+
+        initAudio();
+
+
+        if(
+            !started
+        ){
+
+            startGame();
+
+        }
+
+        else if(
+            gameOver
+        ){
+
+            restartGame();
+
+        }
+
+        else{
+
+            restartGame();
+
+        }
+
+
+        if(
+            navigator.vibrate
+        ){
+
+            navigator.vibrate(18);
+
+        }
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+/* =========================================================
+              手机直接点击游戏区域开始
+   ========================================================= */
+
+overlay.addEventListener(
+    "pointerdown",
+    function(event){
+
+        if(
+            !isMobileDevice()
+        ){
+
+            return;
+
+        }
+
+
+        /*
+         * 只处理触摸。
+         */
+
+        if(
+            event.pointerType !== "touch"
+        ){
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        /*
+         * 游戏结束 → 重新开始
+         */
+
+        if(gameOver){
+
+            restartGame();
+
+            return;
+
+        }
+
+
+        /*
+         * 尚未开始 → 开始
+         */
+
+        if(!started){
+
+            startGame();
+
+        }
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+/* =========================================================
+                 手机滑动控制
+                 
+                 在棋盘上滑动即可改变方向
+   ========================================================= */
+
+let touchStartX = 0;
+
+let touchStartY = 0;
+
+let touchTracking = false;
+
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event){
+
+        if(
+            !isMobileDevice()
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            event.pointerType !== "touch"
+        ){
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        touchStartX =
+            event.clientX;
+
+        touchStartY =
+            event.clientY;
+
+        touchTracking =
+            true;
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+canvas.addEventListener(
+    "pointerup",
+    function(event){
+
+        if(
+            !isMobileDevice()
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            event.pointerType !== "touch"
+        ){
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        if(!touchTracking){
+
+            return;
+
+        }
+
+
+        touchTracking =
+            false;
+
+
+        const dx =
+            event.clientX -
+            touchStartX;
+
+
+        const dy =
+            event.clientY -
+            touchStartY;
+
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        /*
+         * 手指移动距离太小，
+         * 不认为是滑动。
+         */
+
+        if(distance < 20){
+
+            return;
+
+        }
+
+
+        /*
+         * 横向滑动
+         */
+
+        if(
+            Math.abs(dx) >
+            Math.abs(dy)
+        ){
+
+            if(dx > 0){
+
+                setMobileDirection(
+                    "right"
+                );
+
+            }
+
+            else{
+
+                setMobileDirection(
+                    "left"
+                );
+
+            }
+
+        }
+
+        /*
+         * 纵向滑动
+         */
+
+        else{
+
+            if(dy > 0){
+
+                setMobileDirection(
+                    "down"
+                );
+
+            }
+
+            else{
+
+                setMobileDirection(
+                    "up"
+                );
+
+            }
+
+        }
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+canvas.addEventListener(
+    "pointercancel",
+    function(event){
+
+        if(
+            event.pointerType ===
+            "touch"
+        ){
+
+            touchTracking =
+                false;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
                     页面切换
    ========================================================= */
 
 document.addEventListener(
     "visibilitychange",
     function(){
-
-        /*
-         * 切到其他标签页：
-         * 暂停 BGM。
-         */
 
         if(
 
@@ -2424,11 +2981,6 @@ document.addEventListener(
 
         }
 
-
-        /*
-         * 回来：
-         * 继续音乐。
-         */
 
         else if(
 
@@ -2467,4 +3019,3 @@ requestAnimationFrame(
 
 </body>
 </html>
-

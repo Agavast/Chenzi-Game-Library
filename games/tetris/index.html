@@ -4,7 +4,9 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, user-scalable=no">
 
 <title>Tetris · Chenzi Game Library</title>
 
@@ -47,7 +49,6 @@ body{
         #050d1c 65%,
         #020611 100%
     );
-
 
     color:var(--text);
 
@@ -128,10 +129,6 @@ body::before{
 
     width:min(720px,94vw);
 
-    /*
-     * 根据屏幕高度自动控制上下空间
-     * 避免桌面端打开后出现滚动
-     */
     padding:
         clamp(10px,2.5vh,18px)
         0
@@ -234,9 +231,6 @@ h1{
 
     border-radius:16px;
 
-    /*
-     * 高度较小时自动压缩内边距
-     */
     padding:
         clamp(10px,1.8vh,18px);
 
@@ -308,16 +302,6 @@ h1{
 
 #gameCanvas{
 
-    /*
-     * 正常桌面：
-     * 最大 300 × 600
-     *
-     * 高度不足时：
-     * 根据视口高度自动缩小
-     *
-     * 宽度不足时：
-     * 根据视口宽度自动缩小
-     */
     width:min(
         300px,
         38vh,
@@ -341,6 +325,12 @@ h1{
         0 0 35px rgba(0,0,0,.45);
 
     image-rendering:pixelated;
+
+    /*
+     * 手机端禁止浏览器把 Canvas 当成
+     * 滑动/缩放手势区域
+     */
+    touch-action:none;
 }
 
 
@@ -387,6 +377,217 @@ h1{
     margin-bottom:3px;
 
     font-size:12px;
+}
+
+
+/* =========================================================
+                  手机触摸控制区
+========================================================= */
+
+.mobile-controls{
+
+    display:none;
+
+    margin-top:12px;
+
+    width:100%;
+
+    user-select:none;
+
+    -webkit-user-select:none;
+
+    -webkit-touch-callout:none;
+
+    touch-action:none;
+}
+
+
+/*
+ * 第一排：
+ *
+ *       旋转
+ * 左          右
+ */
+
+.mobile-row-main{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        1fr;
+
+    gap:8px;
+
+    width:100%;
+
+    margin-bottom:8px;
+}
+
+
+/*
+ * 第二排：
+ *
+ *     DOWN   DROP   PAUSE
+ */
+
+.mobile-row-action{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        1fr;
+
+    gap:8px;
+
+    width:100%;
+}
+
+
+/* =========================================================
+                       手机按钮
+========================================================= */
+
+.mobile-btn{
+
+    min-height:48px;
+
+    border:
+        1px solid #26344a;
+
+    border-radius:10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #182235,
+            #101927
+        );
+
+    color:#dce4ef;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        "Microsoft YaHei",
+        sans-serif;
+
+    font-size:22px;
+
+    font-weight:600;
+
+    line-height:1;
+
+    user-select:none;
+
+    -webkit-user-select:none;
+
+    -webkit-touch-callout:none;
+
+    touch-action:none;
+
+    -webkit-tap-highlight-color:transparent;
+
+    cursor:pointer;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.04),
+        0 3px 8px rgba(0,0,0,.2);
+
+    transition:
+        transform .06s,
+        background .06s,
+        border-color .06s;
+}
+
+
+.mobile-btn.small{
+
+    font-size:16px;
+
+    letter-spacing:.5px;
+}
+
+
+.mobile-btn:active{
+
+    transform:
+        translateY(2px);
+
+    background:
+        #20304a;
+
+    border-color:
+        #38506e;
+
+    box-shadow:
+        inset 0 2px 5px rgba(0,0,0,.25);
+}
+
+
+/*
+ * 中间旋转按钮稍微突出
+ */
+
+.mobile-btn.rotate{
+
+    color:#bfe8ff;
+
+    border-color:#31516d;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1a2c42,
+            #122033
+        );
+}
+
+
+/*
+ * 硬降
+ */
+
+.mobile-btn.drop{
+
+    color:#b9f3db;
+
+    border-color:#315a4b;
+
+    background:
+        linear-gradient(
+            180deg,
+            #17352d,
+            #112a23
+        );
+}
+
+
+/*
+ * 暂停
+ */
+
+.mobile-btn.pause-btn{
+
+    color:#b8d2ff;
+
+    border-color:#314b70;
+
+    background:
+        linear-gradient(
+            180deg,
+            #172942,
+            #111f34
+        );
 }
 
 
@@ -515,7 +716,6 @@ h1{
 .pause{
 
     color:#8bb8ff;
-
 }
 
 
@@ -590,9 +790,6 @@ h1{
 
     #gameCanvas{
 
-        /*
-         * 手机端优先保证棋盘足够大
-         */
         width:min(
             300px,
             78vw
@@ -604,30 +801,30 @@ h1{
     }
 
 
+    /*
+     * 原来的电脑操作提示在手机上隐藏
+     */
+
     .controls{
 
-        margin-top:10px;
-
-        grid-template-columns:
-            repeat(3,1fr);
-
-        gap:6px;
+        display:none;
     }
 
 
-    .control{
+    /*
+     * 显示真正的手机控制器
+     */
 
-        padding:7px 3px;
+    .mobile-controls{
 
-        font-size:10px;
+        display:block;
     }
 
 
-    .control b{
+    .mobile-btn{
 
-        font-size:11px;
-
-        margin-bottom:2px;
+        min-height:
+            clamp(46px,12vw,58px);
     }
 
 
@@ -827,7 +1024,10 @@ h1{
     </div>
 
 
-    <!-- 操作 -->
+    <!-- =================================================
+                    电脑端操作提示
+         原样保留，不改变电脑端
+    ================================================== -->
 
     <div class="controls">
 
@@ -855,6 +1055,100 @@ h1{
             <b>P</b>
             PAUSE
         </div>
+
+    </div>
+
+
+    <!-- =================================================
+                    手机端触摸控制
+    ================================================== -->
+
+    <div
+        class="mobile-controls"
+        id="mobileControls">
+
+
+        <!-- 第一排：左右 + 旋转 -->
+
+        <div class="mobile-row-main">
+
+
+            <button
+                type="button"
+                class="mobile-btn"
+                id="mobileLeft"
+                aria-label="Move Left">
+
+                ←
+
+            </button>
+
+
+            <button
+                type="button"
+                class="mobile-btn rotate"
+                id="mobileRotate"
+                aria-label="Rotate">
+
+                ↻
+
+            </button>
+
+
+            <button
+                type="button"
+                class="mobile-btn"
+                id="mobileRight"
+                aria-label="Move Right">
+
+                →
+
+            </button>
+
+
+        </div>
+
+
+        <!-- 第二排：下降 + 硬降 + 暂停 -->
+
+        <div class="mobile-row-action">
+
+
+            <button
+                type="button"
+                class="mobile-btn"
+                id="mobileDown"
+                aria-label="Move Down">
+
+                ↓
+
+            </button>
+
+
+            <button
+                type="button"
+                class="mobile-btn drop"
+                id="mobileDrop"
+                aria-label="Hard Drop">
+
+                DROP
+
+            </button>
+
+
+            <button
+                type="button"
+                class="mobile-btn pause-btn"
+                id="mobilePause"
+                aria-label="Pause">
+
+                PAUSE
+
+            </button>
+
+
+        </div>
+
 
     </div>
 
@@ -2047,6 +2341,10 @@ function restart(){
                          键盘
 ========================================================= */
 
+/*
+ * 电脑端原有键盘逻辑保持不变
+ */
+
 document.addEventListener(
     "keydown",
     e => {
@@ -2156,6 +2454,185 @@ document
 
         }
     );
+
+
+/* =========================================================
+                 手机触摸控制
+========================================================= */
+
+/*
+ * 这里使用 Pointer Events，而不是：
+ *
+ * touchstart + click
+ *
+ * 这样可以避免一次触摸执行两遍。
+ *
+ * 电脑端完全不会进入这组控制，
+ * 因为这些按钮只在 max-width:520px 时显示。
+ */
+
+
+/*
+ * 防止按钮触摸时：
+ *
+ * 1. 页面滚动
+ * 2. 浏览器长按菜单
+ * 3. 双击缩放
+ */
+
+const mobileButtons =
+    document.querySelectorAll(
+        ".mobile-btn"
+    );
+
+
+mobileButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "pointerdown",
+            event => {
+
+                event.preventDefault();
+
+                /*
+                 * 如果浏览器支持 pointer capture，
+                 * 立即锁定当前指针。
+                 */
+
+                if(
+                    button.setPointerCapture
+                ){
+
+                    try{
+
+                        button.setPointerCapture(
+                            event.pointerId
+                        );
+
+                    }catch(error){}
+
+                }
+
+
+                /*
+                 * 根据按钮执行对应动作
+                 */
+
+                switch(
+                    button.id
+                ){
+
+                    case "mobileLeft":
+
+                        move(-1);
+
+                        break;
+
+
+                    case "mobileRight":
+
+                        move(1);
+
+                        break;
+
+
+                    case "mobileDown":
+
+                        drop();
+
+                        break;
+
+
+                    case "mobileRotate":
+
+                        rotate();
+
+                        draw();
+
+                        break;
+
+
+                    case "mobileDrop":
+
+                        hardDrop();
+
+                        break;
+
+
+                    case "mobilePause":
+
+                        togglePause();
+
+                        break;
+
+                }
+
+            },
+            {
+                passive:false
+            }
+        );
+
+
+        /*
+         * 防止某些浏览器继续触发 click
+         * 造成一次触摸执行两次。
+         */
+
+        button.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+            }
+        );
+
+    }
+);
+
+
+/*
+ * 手机端额外禁止页面上的触摸手势。
+ *
+ * 只针对游戏区域，不影响顶部返回链接。
+ */
+
+const mobileControls =
+    document.getElementById(
+        "mobileControls"
+    );
+
+
+mobileControls.addEventListener(
+    "touchmove",
+    event => {
+
+        event.preventDefault();
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+/*
+ * 某些 iOS 浏览器会在快速连续点击时
+ * 尝试触发双击缩放。
+ *
+ * 对游戏控制区域直接禁止。
+ */
+
+mobileControls.addEventListener(
+    "dblclick",
+    event => {
+
+        event.preventDefault();
+
+    }
+);
 
 
 /* =========================================================

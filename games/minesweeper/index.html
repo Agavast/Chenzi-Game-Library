@@ -230,6 +230,8 @@ button{
         transform .08s;
 
     line-height:1;
+
+    touch-action:none;
 }
 
 .cell:hover{
@@ -633,14 +635,103 @@ button{
         border-radius:11px;
     }
 
+    /*
+     * 这里是本次移动端修复的关键：
+     * 菜单状态下 board-wrap 必须有实际高度，
+     * 否则 overlay 没有可显示的空间。
+     */
     .board-wrap{
         max-height:none;
         min-height:0;
         padding:7px;
     }
 
+    .board-wrap.menu-active{
+        min-height:500px;
+        height:500px;
+    }
+
     .side{
         margin-top:12px;
+    }
+
+    /*
+     * 手机棋盘禁止浏览器手势干扰
+     */
+    .board{
+        touch-action:none;
+        -webkit-touch-callout:none;
+        -webkit-user-select:none;
+        user-select:none;
+    }
+
+    .cell{
+        touch-action:none;
+        -webkit-touch-callout:none;
+        -webkit-user-select:none;
+        user-select:none;
+    }
+
+    /*
+     * 手机版菜单按钮稍微压缩，
+     * 防止小屏手机菜单超出可视区域。
+     */
+    .menu{
+        width:92%;
+        max-width:420px;
+    }
+
+    .menu-logo{
+        font-size:32px;
+        letter-spacing:3px;
+    }
+
+    .menu-sub{
+        font-size:9px;
+        margin-bottom:18px;
+    }
+
+    .menu-buttons{
+        gap:7px;
+    }
+
+    .big-btn{
+        height:44px;
+    }
+
+    .mode-grid{
+        gap:6px;
+    }
+
+    .mode-btn{
+        height:54px;
+    }
+
+    .mode-btn strong{
+        font-size:13px;
+    }
+
+    .mode-btn span{
+        font-size:9px;
+    }
+
+    .menu-note{
+        margin-top:11px;
+        font-size:9px;
+    }
+
+
+    /*
+     * =====================================================
+     * 手机端专用：
+     * 隐藏 20 × 20 与 CLASSIC
+     *
+     * 电脑端完全不受影响。
+     * =====================================================
+     */
+    .mode-btn[data-rows="20"],
+    .mode-btn[data-classic="true"]{
+        display:none;
     }
 
 }
@@ -673,6 +764,11 @@ button{
         padding:4px;
     }
 
+    .board-wrap.menu-active{
+        min-height:460px;
+        height:460px;
+    }
+
     .side{
         gap:7px;
     }
@@ -690,7 +786,7 @@ button{
     }
 
     .menu-logo{
-        font-size:32px;
+        font-size:28px;
     }
 
     .mode-grid{
@@ -698,7 +794,7 @@ button{
     }
 
     .mode-btn{
-        height:54px;
+        height:52px;
     }
 
 }
@@ -732,12 +828,43 @@ button{
         font-size:6px;
     }
 
+    .board-wrap.menu-active{
+        min-height:430px;
+        height:430px;
+    }
+
     .menu{
-        width:90%;
+        width:94%;
     }
 
     .menu-logo{
-        font-size:27px;
+        font-size:25px;
+        letter-spacing:2px;
+    }
+
+    .menu-sub{
+        font-size:8px;
+        margin-bottom:14px;
+    }
+
+    .big-btn{
+        height:42px;
+    }
+
+    .mode-btn{
+        height:50px;
+    }
+
+    .mode-btn strong{
+        font-size:12px;
+    }
+
+    .mode-btn span{
+        font-size:8px;
+    }
+
+    .menu-note{
+        font-size:8px;
     }
 
 }
@@ -799,8 +926,6 @@ button{
                     id="board">
                 </div>
 
-
-                <!-- 游戏状态文字 -->
 
                 <div
                     class="game-message"
@@ -929,8 +1054,6 @@ button{
         <aside class="side">
 
 
-            <!-- STATUS -->
-
             <section class="side-card">
 
                 <div class="stats">
@@ -987,8 +1110,6 @@ button{
 
             </section>
 
-
-            <!-- CONTROLS -->
 
             <section class="side-card">
 
@@ -1051,8 +1172,6 @@ button{
             </section>
 
 
-            <!-- ACTIONS -->
-
             <section class="side-card">
 
                 <div class="controls-title">
@@ -1079,8 +1198,6 @@ button{
 
             </section>
 
-
-            <!-- RULES -->
 
             <section class="side-card">
 
@@ -1162,16 +1279,21 @@ const gameMessage =
 
 
 /* ============================================================
-   EXPLOSION SOUND
+   DEVICE
 ============================================================ */
 
-/*
-   地雷爆炸音效
-   使用本地文件 lose_minesweeper.wav
+function isMobileDevice(){
 
-   lose_minesweeper.wav 与 index.html
-   位于同一个文件夹。
-*/
+    return window.matchMedia(
+        "(max-width:800px)"
+    ).matches;
+
+}
+
+
+/* ============================================================
+   EXPLOSION SOUND
+============================================================ */
 
 const explosionSound =
     new Audio(
@@ -1220,6 +1342,17 @@ let firstClick = true;
 
 
 /* ============================================================
+   MOBILE TOUCH STATE
+============================================================ */
+
+let mobileLongPressTimer = null;
+
+let mobileLongPressTriggered = false;
+
+let mobileTouchCell = null;
+
+
+/* ============================================================
    DEFAULT MODE
 ============================================================ */
 
@@ -1265,6 +1398,10 @@ function startMode(
     createGame();
 
     overlay.classList.add("hidden");
+
+    boardWrap.classList.remove(
+        "menu-active"
+    );
 
     hideMessage();
 
@@ -1486,10 +1623,30 @@ function createBoard(){
             cell.dataset.col = c;
 
 
+            /*
+             * =================================================
+             * 桌面端
+             * 完全保留原来的 click / contextmenu
+             * =================================================
+             */
+
             cell.addEventListener(
                 "click",
                 ()=>{
+                    if(
+                        isMobileDevice() &&
+                        mobileLongPressTriggered
+                    ){
+
+                        mobileLongPressTriggered =
+                            false;
+
+                        return;
+
+                    }
+
                     leftClick(r,c);
+
                 }
             );
 
@@ -1497,11 +1654,205 @@ function createBoard(){
             cell.addEventListener(
                 "contextmenu",
                 e=>{
+
                     e.preventDefault();
 
+                    if(
+                        isMobileDevice()
+                    ){
+
+                        return;
+
+                    }
+
                     rightClick(r,c);
+
                 }
             );
+
+
+            /*
+             * =================================================
+             * 手机版触摸控制
+             * =================================================
+             */
+
+            if(isMobileDevice()){
+
+                cell.addEventListener(
+                    "pointerdown",
+                    e=>{
+
+                        if(
+                            e.pointerType !== "touch"
+                        ){
+
+                            return;
+
+                        }
+
+
+                        e.preventDefault();
+
+
+                        mobileLongPressTriggered =
+                            false;
+
+                        mobileTouchCell =
+                            cell;
+
+
+                        clearTimeout(
+                            mobileLongPressTimer
+                        );
+
+
+                        mobileLongPressTimer =
+                            setTimeout(
+                                ()=>{
+
+                                    if(
+                                        !mobileTouchCell
+                                    ){
+
+                                        return;
+
+                                    }
+
+
+                                    if(
+                                        state !==
+                                        "playing"
+                                    ){
+
+                                        return;
+
+                                    }
+
+
+                                    const rr =
+                                        Number(
+                                            mobileTouchCell
+                                                .dataset
+                                                .row
+                                        );
+
+                                    const cc =
+                                        Number(
+                                            mobileTouchCell
+                                                .dataset
+                                                .col
+                                        );
+
+
+                                    mobileLongPressTriggered =
+                                        true;
+
+
+                                    rightClick(
+                                        rr,
+                                        cc
+                                    );
+
+
+                                    if(
+                                        navigator.vibrate
+                                    ){
+
+                                        navigator.vibrate(
+                                            35
+                                        );
+
+                                    }
+
+                                },
+                                450
+                            );
+
+                    },
+                    {
+                        passive:false
+                    }
+                );
+
+
+                cell.addEventListener(
+                    "pointerup",
+                    e=>{
+
+                        if(
+                            e.pointerType !== "touch"
+                        ){
+
+                            return;
+
+                        }
+
+
+                        e.preventDefault();
+
+
+                        clearTimeout(
+                            mobileLongPressTimer
+                        );
+
+
+                        mobileTouchCell =
+                            null;
+
+                    },
+                    {
+                        passive:false
+                    }
+                );
+
+
+                cell.addEventListener(
+                    "pointercancel",
+                    e=>{
+
+                        if(
+                            e.pointerType !== "touch"
+                        ){
+
+                            return;
+
+                        }
+
+                        clearTimeout(
+                            mobileLongPressTimer
+                        );
+
+                        mobileTouchCell =
+                            null;
+
+                    }
+                );
+
+
+                cell.addEventListener(
+                    "pointerleave",
+                    e=>{
+
+                        if(
+                            e.pointerType !== "touch"
+                        ){
+
+                            return;
+
+                        }
+
+                        clearTimeout(
+                            mobileLongPressTimer
+                        );
+
+                        mobileTouchCell =
+                            null;
+
+                    }
+                );
+
+            }
 
 
             board.appendChild(cell);
@@ -1957,10 +2308,6 @@ function explode(r,c){
     clearTimer();
 
 
-    /* ================================================
-       播放本地踩雷爆炸音效
-    ================================================ */
-
     try{
 
         explosionSound.currentTime = 0;
@@ -1976,8 +2323,6 @@ function explode(r,c){
 
     }
 
-
-    /* 显示所有雷 */
 
     for(let rr=0;rr<rows;rr++){
 
@@ -2235,6 +2580,14 @@ function showMenu(){
 
     clearTimer();
 
+    clearTimeout(
+        mobileLongPressTimer
+    );
+
+    mobileTouchCell = null;
+
+    mobileLongPressTriggered = false;
+
     board.innerHTML = "";
 
     cells = [];
@@ -2244,6 +2597,16 @@ function showMenu(){
     overlay.classList.remove(
         "hidden"
     );
+
+
+    if(isMobileDevice()){
+
+        boardWrap.classList.add(
+            "menu-active"
+        );
+
+    }
+
 
     modeValue.textContent =
         "—";
@@ -2255,8 +2618,12 @@ function showMenu(){
         "000";
 
 
-    boardWrap.style.minHeight =
-        "";
+    if(!isMobileDevice()){
+
+        boardWrap.style.minHeight =
+            "";
+
+    }
 
 
     document.documentElement
@@ -2400,6 +2767,18 @@ window.addEventListener(
     ()=>{
         requestAnimationFrame(()=>{
             resizeBoard();
+
+            if(
+                isMobileDevice() &&
+                state === "menu"
+            ){
+
+                boardWrap.classList.add(
+                    "menu-active"
+                );
+
+            }
+
         });
     }
 );
@@ -2433,61 +2812,19 @@ board.addEventListener(
 
 
 /* ============================================================
-   MOBILE LONG PRESS
+   MOBILE BOARD SAFETY
 ============================================================ */
 
-let longPressTimer = null;
-
 board.addEventListener(
-    "pointerdown",
+    "contextmenu",
     e=>{
 
-        const cell =
-            e.target.closest(".cell");
+        if(isMobileDevice()){
 
-        if(!cell){
-            return;
-        }
-
-
-        if(e.pointerType === "touch"){
-
-            const r =
-                Number(cell.dataset.row);
-
-            const c =
-                Number(cell.dataset.col);
-
-
-            longPressTimer =
-                setTimeout(()=>{
-
-                    rightClick(r,c);
-
-                },500);
+            e.preventDefault();
 
         }
 
-    }
-);
-
-
-board.addEventListener(
-    "pointerup",
-    ()=>{
-        clearTimeout(
-            longPressTimer
-        );
-    }
-);
-
-
-board.addEventListener(
-    "pointercancel",
-    ()=>{
-        clearTimeout(
-            longPressTimer
-        );
     }
 );
 
@@ -2506,6 +2843,21 @@ timer.textContent =
 
 modeValue.textContent =
     "—";
+
+
+/*
+ * ============================================================
+ * 初始化手机版菜单高度
+ * ============================================================
+ */
+
+if(isMobileDevice()){
+
+    boardWrap.classList.add(
+        "menu-active"
+    );
+
+}
 
 </script>
 
